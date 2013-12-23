@@ -7,38 +7,43 @@
 use strict;
 use warnings;
 
-my $file;
-my $old;
-my $length;
-my $stream;
-my $geturl;
-my $ID=0;
+
+my $file; # filename to write 
+my $olgasfolder="/home/markus/arte/stream"; # folder to store
+my $old=" "; # old filename to fetch the change of the mega data 
+my $stream; # stream m3u8 url
+my $pid;
+my $oldpid;
+my $ID=0; # ID to seperate the screens and kill them
 # url from arte !
 my $url="http://arte.tv/papi/tvguide/videos/livestream/player/D/";
 my $maps="-map 0.6 -map 0.7"; #low quali
 #my $maps="-map 0.0 -map 0.1"; #high quali
 # get init url
 my $text;
+
+`mkdir -p /home/markus/arte/stream/`;
 # parse the url
 &urlparse();
+
 
 while (1) 
 {
 	if ($file ne $old)
 	{
 		print "Next File: $file || $stream || $ID \n";
-		$ID++;
-		echo "ffmpeg $maps -i $stream -strict experimental $file" > /tmp/run.sh
-		`screen -dmS $ID-ffmpeg sh /tmp/run.sh`;
-		getting the new pid
-		$pid = `screen -ls | grep $ID-ffmpeg | sed 's/\s+//;s/.$ID-ffmpeg.*//'`;
-		sleep 10;
+		`echo "ffmpeg $maps -i $stream -strict experimental $olgasfolder/$file" > /tmp/run.sh`; # writing it to a tmp sh file , because screen have problems with lots of arguement (fix me)
+		system("screen -dmS $ID-ffmpeg sh /tmp/run.sh"); # start the ffmpeg dump detached 
+		$pid = `screen -ls | grep ffmpeg | grep -v .1 | sed 's/\\s+//;s/.$ID-ffmpeg.*//'`; # get the current screen pid
+		sleep 10; # wait so that the stream can start and wie capture some overlapping . 
 		if ( $oldpid ) 
 		{
 			`kill $oldpid`;
 		}
-		$oldpid = $pid;
-		$old = $file;
+		$oldpid = $pid; # for the next round 
+		$old = $file; # for the next round 
+		$ID++; # count the id UP
+		print "--runed: PID $pid , OLD $oldpid, ID $ID \n";
 	}
 	sleep 3;
 	&urlparse();
