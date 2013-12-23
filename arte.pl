@@ -32,18 +32,20 @@ while (1)
 	if ($file ne $old)
 	{
 		print "Next File: $file || $stream || $ID \n";
-		`echo "ffmpeg $maps -i $stream -strict experimental $olgasfolder/$file" > /tmp/run.sh`; # writing it to a tmp sh file , because screen have problems with lots of arguement (fix me)
+		`echo "echo "n" | ffmpeg $maps -i $stream -strict experimental $olgasfolder/$file" > /tmp/run.sh`; # writing it to a tmp sh file , because screen have problems with lots of arguement (fix me)
 		system("screen -dmS $ID-ffmpeg sh /tmp/run.sh"); # start the ffmpeg dump detached 
-		$pid = `screen -ls | grep ffmpeg | grep -v .1 | sed 's/\\s+//;s/.$ID-ffmpeg.*//'`; # get the current screen pid
+		$pid = `screen -ls | grep $ID-ffmpeg | sed 's/\s+//;s/.$ID-ffmpeg.*//'`; # get the current screen pid
+		chomp($pid);
 		sleep 10; # wait so that the stream can start and wie capture some overlapping . 
 		if ( $oldpid ) 
 		{
 			`kill $oldpid`;
+			print "killed oldpid\n";
 		}
+		print "--runed: PID $pid , OLD $oldpid, ID $ID \n";
 		$oldpid = $pid; # for the next round 
 		$old = $file; # for the next round 
 		$ID++; # count the id UP
-		print "--runed: PID $pid , OLD $oldpid, ID $ID \n";
 	}
 	sleep 3;
 	&urlparse();
@@ -68,5 +70,5 @@ sub urlparse()
 		$file = `date +"%Y%m%d_%H%M.mp4"`;
 		$stream = "http://delive.artestras.cshls.lldns.net/artestras/contrib/delive.m3u8";
 	}
-	print "Get: $file || $stream \n";
+	print ".";
 }
