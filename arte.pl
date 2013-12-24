@@ -13,7 +13,7 @@ my $olgasfolder="/home/markus/arte/stream"; # folder to store
 my $old=" "; # old filename to fetch the change of the mega data 
 my $stream; # stream m3u8 url
 my $pid;
-my $oldpid;
+my $oldpid=0; #very ugly !
 my $meta;
 my $date;
 my $ID=0; # ID to seperate the screens and kill them
@@ -39,15 +39,15 @@ while (1)
 		$pid = `screen -ls | grep $ID-ffmpeg | sed 's/\s+//;s/.$ID-ffmpeg.*//'`; # get the current screen pid
 		chomp($pid);
 		sleep 10; # wait so that the stream can start and wie capture some overlapping . 
-		if ( $oldpid ) 
+		if ( $oldpid != 0 ) 
 		{
 			`kill $oldpid`;
-			print "killed oldpid\n";
+			print "killed oldpid $oldpid\n";
 		}
 		# write Metadata
 		`echo "$meta" >  $olgasfolder/$file.meta.txt`;
 		# debug output
-		print "--runed: PID $pid , OLD $oldpid, ID $ID \n";
+		print "runed: PID $pid , OLD $oldpid, ID $ID \n";
 		$oldpid = $pid; # for the next round 
 		$old = $file; # for the next round 
 		$ID++; # count the id UP
@@ -81,6 +81,7 @@ sub urlparse()
 	
 	if (!$file || !$stream)
 	{
+		$date = `date +"%Y%m%d_%H"`;
 		$file = "$date.mp4";
 		$stream = "http://delive.artestras.cshls.lldns.net/artestras/contrib/delive.m3u8";
 	}
