@@ -14,6 +14,7 @@ my $old=" "; # old filename to fetch the change of the mega data
 my $stream; # stream m3u8 url
 my $pid;
 my $oldpid;
+my $meta;
 my $ID=0; # ID to seperate the screens and kill them
 # url from arte !
 my $url="http://arte.tv/papi/tvguide/videos/livestream/player/D/";
@@ -42,6 +43,9 @@ while (1)
 			`kill $oldpid`;
 			print "killed oldpid\n";
 		}
+		# write Metadata
+		`echo "$meta" >  $olgasfolder/$file.meta.txt`;
+		# debug output
 		print "--runed: PID $pid , OLD $oldpid, ID $ID \n";
 		$oldpid = $pid; # for the next round 
 		$old = $file; # for the next round 
@@ -63,7 +67,12 @@ sub urlparse()
 	
 	$stream = $text;
 	$stream =~ s/.*"bitrate":.*"url":"http/http/;
-    $stream =~ s/".*//;	
+    $stream =~ s/".*//;
+	
+	$meta = $text;
+	$meta =~ s/.*"VDE":"//; 
+	$meta =~ s/",".*//;
+	$meta =~ s/_/ /g;
 	
 	if (!$file || !$stream)
 	{
