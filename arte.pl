@@ -19,7 +19,7 @@ my $date;
 my $ID=0; # ID to seperate the screens and kill them
 # url from arte !
 my $url="http://arte.tv/papi/tvguide/videos/livestream/player/D/";
-my $maps="-map 0.6 -map 0.7"; #low quali
+my $maps="-map 0.4 -map 0.5"; #low quali
 #my $maps="-map 0.0 -map 0.1"; #high quali
 # get init url
 my $text;
@@ -33,18 +33,20 @@ while (1)
 {
 	if ($file ne $old)
 	{
-		print "Next File: $file || $stream || $ID \n";
+		print "Next File: $file || ID: $ID \n";
 		`echo "ffmpeg $maps -i $stream -strict experimental $olgasfolder/$file" > /tmp/run.sh`; # writing it to a tmp sh file , because screen have problems with lots of arguement (fix me)
 		system("screen -dmS $ID-ffmpeg sh /tmp/run.sh"); # start the ffmpeg dump detached 
-		$pid = `screen -ls | grep $ID-ffmpeg | sed 's/\\s+//;s/.$ID-ffmpeg.*//'`; # get the current screen pid
+		$pid = `ps aux | grep ffmpeg | grep $file | awk '{print \$2}'`; # get the current screen pid
 		chomp($pid);
+		#print "dritter mit PID $pid";
 		sleep 10; # wait so that the stream can start and wie capture some overlapping . 
 		if ( $oldpid != 0 ) 
 		{
-			`kill -SIGINT $oldpid`;
+			`kill -2 $oldpid`;
 			print "killed oldpid $oldpid\n";
 		}
 		# write Metadata
+		chomp($meta);
 		`echo "$meta" >  $olgasfolder/$file.meta.txt`;
 		# debug output
 		print "runed: PID $pid , OLD $oldpid, ID $ID \n";
@@ -59,7 +61,7 @@ while (1)
 
 sub urlparse()
 {
-	$date = `date +"%Y%m%d"`;	
+	$date = `date +"%Y%m%d"`;
 	chomp($date);
 
 	$text=`wget $url -qO-`;
@@ -82,8 +84,18 @@ sub urlparse()
 	if (!$file || !$stream)
 	{
 		$date = `date +"%Y%m%d_%H"`;
+		chomp($date);
 		$file = "$date.mp4";
 		$stream = "http://delive.artestras.cshls.lldns.net/artestras/contrib/delive.m3u8";
+		print "1";
+	}
+	if ( $file =~ m/.*Live.mp4.*/ || $file =~ m/.*ARTE_Journal.mp4/ )
+	{
+		#add a special id to this , becasue its not unique stream
+		my $datespacial = `date +"%Y%m%d_%H"`;
+		chomp($datespacial);
+		$file =~ s/$date/$datespacial/;
+		print "2";
 	}
 	print ".";
 }
