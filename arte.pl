@@ -36,12 +36,12 @@ while (1)
 		print "Next File: $file || $stream || $ID \n";
 		`echo "ffmpeg $maps -i $stream -strict experimental $olgasfolder/$file" > /tmp/run.sh`; # writing it to a tmp sh file , because screen have problems with lots of arguement (fix me)
 		system("screen -dmS $ID-ffmpeg sh /tmp/run.sh"); # start the ffmpeg dump detached 
-		$pid = `screen -ls | grep $ID-ffmpeg | sed 's/\s+//;s/.$ID-ffmpeg.*//'`; # get the current screen pid
+		$pid = `screen -ls | grep $ID-ffmpeg | sed 's/\\s+//;s/.$ID-ffmpeg.*//'`; # get the current screen pid
 		chomp($pid);
 		sleep 10; # wait so that the stream can start and wie capture some overlapping . 
 		if ( $oldpid != 0 ) 
 		{
-			`kill $oldpid`;
+			`kill -SIGINT $oldpid`;
 			print "killed oldpid $oldpid\n";
 		}
 		# write Metadata
