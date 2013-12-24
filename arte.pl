@@ -15,6 +15,7 @@ my $stream; # stream m3u8 url
 my $pid;
 my $oldpid;
 my $meta;
+my $date;
 my $ID=0; # ID to seperate the screens and kill them
 # url from arte !
 my $url="http://arte.tv/papi/tvguide/videos/livestream/player/D/";
@@ -33,7 +34,7 @@ while (1)
 	if ($file ne $old)
 	{
 		print "Next File: $file || $stream || $ID \n";
-		`echo "echo "n" | ffmpeg $maps -i $stream -strict experimental $olgasfolder/$file" > /tmp/run.sh`; # writing it to a tmp sh file , because screen have problems with lots of arguement (fix me)
+		`echo "ffmpeg $maps -i $stream -strict experimental $olgasfolder/$file" > /tmp/run.sh`; # writing it to a tmp sh file , because screen have problems with lots of arguement (fix me)
 		system("screen -dmS $ID-ffmpeg sh /tmp/run.sh"); # start the ffmpeg dump detached 
 		$pid = `screen -ls | grep $ID-ffmpeg | sed 's/\s+//;s/.$ID-ffmpeg.*//'`; # get the current screen pid
 		chomp($pid);
@@ -58,12 +59,16 @@ while (1)
 
 sub urlparse()
 {
+	$date = `date +"%Y%m%d"`;	
+	chomp($date);
+
 	$text=`wget $url -qO-`;
 	$text =~ s/ /_/g;
 	
 	$file = $text;
 	$file =~ s/.*"VTI":"//;
 	$file =~ s/".*/.mp4/;
+	$file = "$date-$file";
 	
 	$stream = $text;
 	$stream =~ s/.*"bitrate":.*"url":"http/http/;
@@ -76,7 +81,7 @@ sub urlparse()
 	
 	if (!$file || !$stream)
 	{
-		$file = `date +"%Y%m%d_%H%M.mp4"`;
+		$file = "$date.mp4";
 		$stream = "http://delive.artestras.cshls.lldns.net/artestras/contrib/delive.m3u8";
 	}
 	print ".";
