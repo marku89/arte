@@ -2,14 +2,14 @@
 # Download for arte files 
 # wget http://arte.tv/papi/tvguide/videos/livestream/player/D/
 # rtmpdump -v -r "rtmp://artestras.fc.llnwd.net/artestras/s_artestras_scst_geoFRDE_de?s=1320220800&h=878865258ebb8eaa437b99c3c7598998" -o test.mp4 
-# better ! no lags ffmpeg -map 0.6 -map 0.7 -i "http://delive.artestras.cshls.lldns.net/artestras/contrib/delive.m3u8" -strict experimental test.mp4
+# with lags ffmpeg -map 0.6 -map 0.7 -i "http://delive.artestras.cshls.lldns.net/artestras/contrib/delive.m3u8" -strict experimental test.mp4
 
 use strict;
 use warnings;
 
 
 my $file; # filename to write 
-my $ogfolder="/home/markus/arte"; # folder to store
+my $ogfolder="/home/markus/arte/stream"; # folder to store
 my $old=" "; # old filename to fetch the change of the mega data 
 my $stream; # stream m3u8 url
 my $pid;
@@ -42,7 +42,14 @@ while (1)
 {
 	if ($file ne $old)
 	{
-		print "Next File: $file || ID: $ID \n";
+		print "INPUT File: $file || ID: $ID \n";
+		if ( $file =~ m/.*Live\.mp4/ ||  $file =~ m/.*ARTE_Journal\.mp4/ ) 
+		{
+			print "No record of live and Journal \n";
+			sleep 3;
+			&urlparse();
+			next;
+		}
 		#`echo "ffmpeg $maps -i $stream -strict experimental $ogfolder/$ID-$file" > /tmp/run.sh`; # writing it to a tmp sh file , because screen have problems with lots of arguement (fix me)
 		`echo "rtmpdump -v -r \\\"rtmp://artestras.fc.llnwd.net/artestras/s_artestras_scst_geoFRDE_de?s=1320220800&h=878865258ebb8eaa437b99c3c7598998\\\" -o $ogfolder/$ID-$file" > /tmp/run.sh`; 
 		system("screen -dmS $ID-rtmp sh /tmp/run.sh"); # start the ffmpeg dump detached 
@@ -61,7 +68,7 @@ while (1)
 		}
 		# write Metadata
 		chomp($meta);
-		`echo "$meta" >  "$ogfolder/$ID-$file.meta.txt"`;
+		`echo $meta > $ogfolder/$ID-$file.meta.txt`;
 		# debug output
 		print "runed: PID $pid , OLD $oldpid, ID $ID \n";
 		$oldpid = $pid; # for the next round 
