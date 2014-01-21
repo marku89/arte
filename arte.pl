@@ -9,7 +9,7 @@ use warnings;
 
 
 my $file; # filename to write 
-my $ogfolder="/home/ftp/share/arte"; # folder to store
+my $ogfolder="/home/markus/arte"; # folder to store
 my $old=" "; # old filename to fetch the change of the mega data 
 my $stream; # stream m3u8 url
 my $pid;
@@ -25,6 +25,15 @@ my $maps="-map 0.2 -map 0.3"; #low quali
 my $text;
 
 `mkdir -p $ogfolder`;
+
+if (`ls /tmp/ID 2> /dev/null`)
+{
+   my $temp = `cat /tmp/ID`;
+   chomp($temp);
+   $ID = $temp;
+}
+print "ID ist -$ID-\n";
+
 # parse the url
 &urlparse();
 
@@ -37,7 +46,7 @@ while (1)
 		#`echo "ffmpeg $maps -i $stream -strict experimental $ogfolder/$ID-$file" > /tmp/run.sh`; # writing it to a tmp sh file , because screen have problems with lots of arguement (fix me)
 		`echo "rtmpdump -v -r \\\"rtmp://artestras.fc.llnwd.net/artestras/s_artestras_scst_geoFRDE_de?s=1320220800&h=878865258ebb8eaa437b99c3c7598998\\\" -o $ogfolder/$ID-$file" > /tmp/run.sh`; 
 		system("screen -dmS $ID-rtmp sh /tmp/run.sh"); # start the ffmpeg dump detached 
-		sleep 20; # wait so that the stream can start and wie capture some overlapping .
+		sleep 240; # wait so that the stream can start and wie capture some overlapping .
 		$pid = `ps aux | grep rtmp | grep "$file" | awk '{print \$2}' | head -n 1`; # get the current screen pid
 		chomp($pid);
 		print "dritter mit PID $pid\n";
@@ -58,6 +67,7 @@ while (1)
 		$oldpid = $pid; # for the next round 
 		$old = $file; # for the next round 
 		$ID++; # count the id UP
+		`echo $ID > /tmp/ID`
 	}
 	sleep 3;
 	&urlparse();
