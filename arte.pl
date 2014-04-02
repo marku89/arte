@@ -39,13 +39,20 @@ while (1)
 	if ($file ne $old)
 	{
 		print "INPUT File: $file || ID: $ID  || orgfile: $filename\n";
-		if ( glob("$ogfolder/*$filename") && !(`grep $filename $exclude`) )
+		if ( glob("$ogfolder/*$filename") && !(`grep $filename $exclude`)  )
 		{
 			print "e";
-            sleep 1;
-            &urlparse();
-            next;
+           	 	sleep 1;
+		        &urlparse();
+            		next;
 		}
+		if ( $file =~ m/.*Live\.mp4/ ||  $file =~ m/.*ARTE_Journal\.mp4/ ) 
+		{
+                        print "l";
+                        sleep 1;
+                        &urlparse();
+                        next;
+                }
 		#`echo "ffmpeg $maps -i $stream -strict experimental $ogfolder/$ID-$file" > /tmp/run.sh`; # writing it to a tmp sh file , because screen have problems with lots of arguement (fix me)
 		`echo "rtmpdump -v -r \\\"rtmp://artestras.fc.llnwd.net/artestras/s_artestras_scst_geoFRDE_de?s=1320220800&h=878865258ebb8eaa437b99c3c7598998\\\" -o $ogfolder/$file" > /tmp/run.sh`; 
 		system("screen -dmS $ID-rtmp sh /tmp/run.sh"); # start the ffmpeg dump detached 
