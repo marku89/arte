@@ -120,6 +120,9 @@ sub urlparse()
 	if ( $ID eq "{" )
 	{
 		$ID = 0;
+<<<<<<< HEAD
+>>>>>>> 13ecd2ce3fbc578eebf6c259f612f72250f1948e
+=======
 >>>>>>> 13ecd2ce3fbc578eebf6c259f612f72250f1948e
 	}
 	# dateinamen erzeugung
