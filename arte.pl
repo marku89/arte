@@ -18,6 +18,7 @@ my $date;
 my $startdate;
 my $offset;
 my $ID=0; # ID to seperate the screens and kill them
+my $URL;
 
 # url from arte !
 my $url="http://arte.tv/papi/tvguide/videos/livestream/player/D/";
@@ -97,11 +98,23 @@ sub urlparse()
 	chomp($date);
 
 	$text=`wget $url -qO-`;
+	
+	# Prüfung ob Live rechte da sind ?
+	$URL =  $text;
+	$URL =~ s/.*VUP":"//;
+	$URL =~ s/".*//;
+	if (`wget $URL -qO - | grep "Als Live verfügbar: nein"` )
+	{
+		print "n";
+		return;	
+	}
+	# text umbau so das keine probleme enstehen beim parsen
 	$text =~ s/ /_/g;
 	$text =~ s/\(/_/g;
 	$text =~ s/\)/_/g;
 	$text =~ s/\//_/g;
-    	# Arte ID
+
+    	# get Arte ID
 	$ID = $text;
 	$ID =~ s/.*IID":"//;
 	$ID =~ s/".*//;
