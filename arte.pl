@@ -18,6 +18,8 @@ my $oldpid=`cat /tmp/PID`; #very ugly !
 my $meta;
 my $json;
 my $date;
+my $startdate;
+my $offset;
 my $ID=0; # ID to seperate the screens and kill them
 # url from arte !
 my $url="http://arte.tv/papi/tvguide/videos/livestream/player/D/";
@@ -102,6 +104,7 @@ sub urlparse()
 	$text =~ s/\(/_/g;
 	$text =~ s/\)/_/g;
 	$text =~ s/\//_/g;
+<<<<<<< HEAD
 	# Arte ID
 	$ID = $text;
 	$ID =~ s/.*IID":"//;
@@ -109,6 +112,15 @@ sub urlparse()
 	if ( !$ID )
 	{
 		$ID=23;
+=======
+    # Arte ID
+    $ID = $text;
+    $ID =~ s/.*IID":"//;
+    $ID =~ s/".*//;
+	if ( $ID eq "{" )
+	{
+		$ID = 0;
+>>>>>>> 13ecd2ce3fbc578eebf6c259f612f72250f1948e
 	}
 	# dateinamen erzeugung
 	$file = $text;
