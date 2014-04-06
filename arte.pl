@@ -1,8 +1,6 @@
 #!/usr/bin/perl
 # Download for arte files 
 # wget http://arte.tv/papi/tvguide/videos/livestream/player/D/
-# rtmpdump -v -r "rtmp://artestras.fc.llnwd.net/artestras/s_artestras_scst_geoFRDE_de?s=1320220800&h=878865258ebb8eaa437b99c3c7598998" -o test.mp4 
-# with lags ffmpeg -map 0.6 -map 0.7 -i "http://delive.artestras.cshls.lldns.net/artestras/contrib/delive.m3u8" -strict experimental test.mp4
 
 use strict;
 use warnings;
@@ -12,7 +10,6 @@ my $file; # filename to write
 my $ogfolder="/arte/stream"; # folder to store
 my $exclude="exclude"; # exclude list from doublicate checking
 my $old=" "; # old filename to fetch the change of the mega data 
-#my $stream; # stream m3u8 url # old
 my $pid;
 my $oldpid=`cat /tmp/PID`; #very ugly !
 my $meta;
@@ -21,10 +18,10 @@ my $date;
 my $startdate;
 my $offset;
 my $ID=0; # ID to seperate the screens and kill them
+
 # url from arte !
 my $url="http://arte.tv/papi/tvguide/videos/livestream/player/D/";
-my $maps="-map 0.2 -map 0.3"; #low quali
-#my $maps="-map 0.0 -map 0.1"; #high quali
+
 # get init url
 my $text;
 my $filename;
@@ -104,26 +101,13 @@ sub urlparse()
 	$text =~ s/\(/_/g;
 	$text =~ s/\)/_/g;
 	$text =~ s/\//_/g;
-<<<<<<< HEAD
-	# Arte ID
+    	# Arte ID
 	$ID = $text;
 	$ID =~ s/.*IID":"//;
 	$ID =~ s/".*//;
-	if ( !$ID )
-	{
-		$ID=23;
-=======
-    # Arte ID
-    $ID = $text;
-    $ID =~ s/.*IID":"//;
-    $ID =~ s/".*//;
 	if ( $ID eq "{" )
 	{
 		$ID = 0;
-<<<<<<< HEAD
->>>>>>> 13ecd2ce3fbc578eebf6c259f612f72250f1948e
-=======
->>>>>>> 13ecd2ce3fbc578eebf6c259f612f72250f1948e
 	}
 	# dateinamen erzeugung
 	$file = $text;
