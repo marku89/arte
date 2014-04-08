@@ -11,7 +11,7 @@ my $ogfolder="/arte/stream"; # folder to store
 my $exclude="exclude"; # exclude list from doublicate checking
 my $old=" "; # old filename to fetch the change of the mega data 
 my $pid;
-my $oldpid=`cat /tmp/PID`; #very ugly !
+my $oldpid=0; #very ugly !
 my $meta;
 my $json;
 my $date;
@@ -19,6 +19,9 @@ my $startdate;
 my $offset;
 my $ID=0; # ID to seperate the screens and kill them
 my $URL;
+my $OLDURL="dummy";
+my $first=1;
+my $rechte=0;
 
 # url from arte !
 my $url="http://arte.tv/papi/tvguide/videos/livestream/player/D/";
@@ -30,15 +33,20 @@ my $filename;
 `mkdir -p $ogfolder`;
 
 # parse the url
-&urlparse();
+#&urlparse();
 
-print "ID ist -$ID-\n";
+#print "ID ist -$ID-\n";
 
 while (1) 
 {
-	if ($file ne $old)
+	&urlparse();
+	if ( $file ne $old )
 	{
-		#print "INPUT1 File: $file || ID: $ID  || orgfile: $filename\n";
+		if ( $first )
+		{
+			print "INPUT1 File: $file || ID: $ID  || orgfile: $filename\n";
+			$first=0;
+		}
 		#my $out=`ls $ogfolder/*$filename`;
 		#print "--outist: $out --- \n";
 		#exit;
@@ -46,51 +54,59 @@ while (1)
 		{
 			print "e";
            	 	sleep 1;
-		        &urlparse();
-            		next;
+			$old = $file; # for the next round
+	                # check if rtmpdump runs
+	                &checkpid();
+			next;
 		}
-		if ( $file =~ m/.*Live\.mp4/ ||  $file =~ m/.*ARTE_Journal\.mp4/ ) 
+		if ( $file =~ m/.*Live\.mp4/ ||  $file =~ m/.*ARTE_Journal\.mp4/ || $file eq "notlive" ) 
 		{
                         print "l";
                         sleep 1;
-                        &urlparse();
-                        next;
+			$old = $file; # for the next round
+                        # check if rtmpdump runs
+ 	                &checkpid();
+			next;
                 }
-
+		# Wenn keine fehler oder doppelungen aufgetreten sind , dann wird aufgenommen
 		print "INPUT2 File: $file || ID: $ID  || orgfile: $filename\n";
-
-		#`echo "ffmpeg $maps -i $stream -strict experimental $ogfolder/$ID-$file" > /tmp/run.sh`; # writing it to a tmp sh file , because screen have problems with lots of arguement (fix me)
-
 		`echo "rtmpdump -v -r \\\"rtmp://artestras.fc.llnwd.net/artestras/s_artestras_scst_geoFRDE_de?s=1320220800&h=878865258ebb8eaa437b99c3c7598998\\\" -o $ogfolder/$file" > /tmp/run.sh`; 
 		system("screen -dmS $ID-rtmp bash /tmp/run.sh"); # start the ffmpeg dump detached 
 		sleep 10; # wait so that the stream can start and wie capture some overlapping .
-		$pid = `ps aux | grep rtmp | grep "$file" | awk '{print \$2}' | head -n 1`; # get the current screen pid
-		chomp($pid);
-		print "dritter mit PID $pid\n";
-		if ( $oldpid ne 0 ) 
-		{
-			`kill -2 $oldpid`;
-			sleep 5;
-			`kill -2 $oldpid`;
-			sleep 5;
-			`kill $oldpid`;
-			print "killed oldpid $oldpid\n";
-		}
+		# check if rtmpdump runs
+		&checkpid();		
 		# write Metadata
 		chomp($meta);
 		`echo $meta > $ogfolder/$file.meta.txt`;
 		`echo $json >> $ogfolder/$file.meta.txt`;
 		# debug output
-		print "runed: PID $pid , OLD $oldpid, ID $ID \n";
+		#print "runed: PID $pid , OLD $oldpid, ID $ID \n";
 		$oldpid = $pid; # for the next round 
 		$old = $file; # for the next round 
-		`echo $ID > /tmp/ID`;
-		`echo $pid > /tmp/PID`;
+		print "\nruned: PID $pid , OLD $oldpid, ID $ID \n";
+		$first=1;
 	}
 	sleep 1;
-	&urlparse();
 }
 
+sub checkpid()
+{
+	# get the current screen pid
+	$pid = `ps aux | grep rtmpdump | grep -v grep |  awk '{print \$2}' | head -n 1`;
+	chomp($pid);
+	#print "PID $pid und oldpid $oldpid";
+	if ( $oldpid != 0 && $pid )
+        {
+            `kill -2 $oldpid`;
+	     sleep 2;
+            `kill -2 $oldpid`;
+            sleep 2;
+            `kill $oldpid`;
+	    $oldpid=0;
+            print "killed oldpid $oldpid\n";
+	    $oldpid = $pid; 
+        }
+}
 
 sub urlparse()
 {
@@ -103,10 +119,27 @@ sub urlparse()
 	$URL =  $text;
 	$URL =~ s/.*VUP":"//;
 	$URL =~ s/".*//;
-	if (`wget $URL -qO - | grep "Als Live verfügbar: nein"` )
+	$URL =~ s/{/dummy/;
+	if ( $URL ne $OLDURL && !$URL && $URL ne "dummy" )
 	{
-		print "n";
-		return;	
+		print "New URL : $URL\n";
+		if (`wget $URL -qO - | grep "Als Live verfügbar: nein"` )
+		{
+			$rechte=1;
+		}
+		else
+		{
+			$rechte=0;
+		}
+		$OLDURL=$URL;
+		$first=1;
+	}
+	if ( $rechte == 1 )
+	{
+	      print "n";
+              $file="notlive";
+              $filename="notlive";
+              return;	
 	}
 	# text umbau so das keine probleme enstehen beim parsen
 	$text =~ s/ /_/g;
