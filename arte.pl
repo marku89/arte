@@ -19,9 +19,10 @@ my $startdate;
 my $offset;
 my $ID=0; # ID to seperate the screens and kill them
 my $URL;
-my $OLDURL="dummy";
+my $OLDURL=" ";
 my $first=1;
 my $rechte=0;
+my $pass=0;
 
 # url from arte !
 my $url="http://arte.tv/papi/tvguide/videos/livestream/player/D/";
@@ -50,24 +51,24 @@ while (1)
 		#my $out=`ls $ogfolder/*$filename`;
 		#print "--outist: $out --- \n";
 		#exit;
-		if ( `ls $ogfolder/*$filename 2> /dev/null` && !`grep $filename exclude`  )
+		if ( `ls $ogfolder/*$filename 2> /dev/null` && !`grep $filename exclude` && $pass == 0 )
 		{
 			print "e";
-           	 	sleep 1;
+		 	sleep 1;
 			$old = $file; # for the next round
-	                # check if rtmpdump runs
-	                &checkpid();
+		        # check if rtmpdump runs
+		        &checkpid();
 			next;
 		}
 		if ( $file =~ m/.*Live\.mp4/ ||  $file =~ m/.*ARTE_Journal\.mp4/ || $file eq "notlive" ) 
 		{
-                        print "l";
-                        sleep 1;
+		        print "l";
+		        sleep 1;
 			$old = $file; # for the next round
-                        # check if rtmpdump runs
- 	                &checkpid();
+		        # check if rtmpdump runs
+		        &checkpid();
 			next;
-                }
+		}
 		# Wenn keine fehler oder doppelungen aufgetreten sind , dann wird aufgenommen
 		print "INPUT2 File: $file || ID: $ID  || orgfile: $filename\n";
 		`echo "rtmpdump -v -r \\\"rtmp://artestras.fc.llnwd.net/artestras/s_artestras_scst_geoFRDE_de?s=1320220800&h=878865258ebb8eaa437b99c3c7598998\\\" -o $ogfolder/$file" > /tmp/run.sh`; 
@@ -77,11 +78,10 @@ while (1)
 		&checkpid();		
 		# write Metadata
 		chomp($meta);
-		`echo $meta > $ogfolder/$file.meta.txt`;
+		`echo \"$meta\n\n\" > $ogfolder/$file.meta.txt`;
 		`echo $json >> $ogfolder/$file.meta.txt`;
 		# debug output
 		#print "runed: PID $pid , OLD $oldpid, ID $ID \n";
-		$oldpid = $pid; # for the next round 
 		$old = $file; # for the next round 
 		print "\nruned: PID $pid , OLD $oldpid, ID $ID \n";
 		$first=1;
@@ -120,17 +120,30 @@ sub urlparse()
 	$URL =~ s/.*VUP":"//;
 	$URL =~ s/".*//;
 	$URL =~ s/{/dummy/;
-	if ( $URL ne $OLDURL && !$URL && $URL ne "dummy" )
+	if ( $URL ne $OLDURL && $URL && $URL ne "dummy" )
 	{
 		print "New URL : $URL\n";
-		if (`wget $URL -qO - | grep "Als Live verfügbar: nein"` )
+		my $seite = `wget $URL -qO - | tail -n +630`;
+	    	#print $page;
+		#if ( grep(/Fernsehserie/,$seite) || grep {/ Doku-Reihe /} $seite || grep {m/ Magazin /} $seite)
+		if ( grep {/Fernsehserie/} $seite or grep {/Doku-Reihe/} $seite or grep {/Magazin/} $seite )
+                {
+                        print "Keyword found";
+                        $pass=1;
+                }
+                else
+                {
+                        $pass=0;
+                }
+	        if ( grep{/Als Live verfügbar: nein/}$seite)
 		{
-			$rechte=1;
-		}
+	    	  	print "Keine Rechte";
+	      		$rechte=1;
+	      	}
 		else
 		{
-			$rechte=0;
-		}
+	      		$rechte=0;
+	      	}
 		$OLDURL=$URL;
 		$first=1;
 	}
