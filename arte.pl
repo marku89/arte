@@ -51,14 +51,17 @@ while (1)
 		#my $out=`ls $ogfolder/*$filename`;
 		#print "--outist: $out --- \n";
 		#exit;
-		if ( `ls $ogfolder/*$filename 2> /dev/null` && !`grep $filename exclude` && $pass == 0 )
+		if ( $pass == 0 )
 		{
+			if ( `ls $ogfolder/*$filename 2> /dev/null` && !`grep $filename exclude` )
+			{
 			print "e";
 		 	sleep 1;
 			$old = $file; # for the next round
 		        # check if rtmpdump runs
 		        &checkpid();
 			next;
+			}
 		}
 		if ( $file =~ m/.*Live\.mp4/ ||  $file =~ m/.*ARTE_Journal\.mp4/ || $file eq "notlive" ) 
 		{
@@ -75,9 +78,11 @@ while (1)
 		system("screen -dmS $ID-rtmp bash /tmp/run.sh"); # start the ffmpeg dump detached 
 		sleep 10; # wait so that the stream can start and wie capture some overlapping .
 		# check if rtmpdump runs
+		print "gotopidcheck";
 		&checkpid();		
 		# write Metadata
 		chomp($meta);
+		print "get meta";
 		`echo \"$meta\n\n\" > $ogfolder/$file.meta.txt`;
 		`echo $json >> $ogfolder/$file.meta.txt`;
 		# debug output
@@ -95,17 +100,18 @@ sub checkpid()
 	$pid = `ps aux | grep rtmpdump | grep -v grep |  awk '{print \$2}' | head -n 1`;
 	chomp($pid);
 	#print "PID $pid und oldpid $oldpid";
-	if ( $oldpid != 0 && $pid )
+	if ( $pid && $oldpid != 0 )
         {
             `kill -2 $oldpid`;
 	     sleep 2;
-            `kill -2 $oldpid`;
-            sleep 2;
             `kill $oldpid`;
-	    $oldpid=0;
-            print "killed oldpid $oldpid\n";
+            print "\nkilled oldpid $oldpid\n";
 	    $oldpid = $pid; 
         }
+	if ( $oldpid == 0 )
+	{
+		$oldpid = $pid;
+	}
 }
 
 sub urlparse()
