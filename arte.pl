@@ -11,7 +11,6 @@ my $ogfolder="/arte/stream"; # folder to store
 my $exclude="exclude"; # exclude list from doublicate checking
 my $old=" "; # old filename to fetch the change of the mega data 
 my $pid;
-my $oldpid=0; #very ugly !
 my $meta;
 my $json;
 my $date;
@@ -59,7 +58,7 @@ while (1)
 		 	sleep 1;
 			$old = $file; # for the next round
 		        # check if rtmpdump runs
-		        &checkpid();
+		        &killoldpid();
 			next;
 			}
 		}
@@ -69,49 +68,45 @@ while (1)
 		        sleep 1;
 			$old = $file; # for the next round
 		        # check if rtmpdump runs
-		        &checkpid();
+		        &killoldpid();
 			next;
 		}
 		# Wenn keine fehler oder doppelungen aufgetreten sind , dann wird aufgenommen
 		print "INPUT2 File: $file || ID: $ID  || orgfile: $filename\n";
+                print "gotopidchecki\n";
+                &killoldpid();
+
 		`echo "rtmpdump -v -r \\\"rtmp://artestras.fc.llnwd.net/artestras/s_artestras_scst_geoFRDE_de?s=1320220800&h=878865258ebb8eaa437b99c3c7598998\\\" -o $ogfolder/$file" > /tmp/run.sh`; 
 		system("screen -dmS $ID-rtmp bash /tmp/run.sh"); # start the ffmpeg dump detached 
-		sleep 10; # wait so that the stream can start and wie capture some overlapping .
-		# check if rtmpdump runs
-		print "gotopidcheck";
-		&checkpid();		
 		# write Metadata
 		chomp($meta);
 		print "get meta";
 		`echo \"$meta\n\n\" > $ogfolder/$file.meta.txt`;
 		`echo $json >> $ogfolder/$file.meta.txt`;
 		# debug output
-		#print "runed: PID $pid , OLD $oldpid, ID $ID \n";
 		$old = $file; # for the next round 
-		print "\nruned: PID $pid , OLD $oldpid, ID $ID \n";
+		print "\nruned: PID $pid ,ID $ID \n";
 		$first=1;
 	}
 	sleep 1;
 }
 
-sub checkpid()
+sub killoldpid()
 {
 	# get the current screen pid
-	$pid = `ps aux | grep rtmpdump | grep -v grep |  awk '{print \$2}' | head -n 1`;
+	$pid = `pidof rtmpdump`;
 	chomp($pid);
-	#print "PID $pid und oldpid $oldpid";
-	if ( $pid && $oldpid != 0 )
+	if ( $pid )
         {
-            `kill -2 $oldpid`;
+            `killall -2 rtmpdump`;
 	     sleep 2;
-            `kill $oldpid`;
-            print "\nkilled oldpid $oldpid\n";
-	    $oldpid = $pid; 
+	     if ( `pidof rtmpdump` )
+	     {
+		#killardly
+            	`killall rtmpdump`;
+	     }
+            print "\nkilled rtmpdump\n";
         }
-	if ( $oldpid == 0 )
-	{
-		$oldpid = $pid;
-	}
 }
 
 sub urlparse()
