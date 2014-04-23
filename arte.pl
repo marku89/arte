@@ -93,7 +93,7 @@ while (1)
 
 sub killoldpid()
 {
-	# get the current screen pid
+	print "get the current screen pid";
 	$pid = `pidof rtmpdump`;
 	chomp($pid);
 	if ( $pid )
@@ -114,7 +114,7 @@ sub urlparse()
 	$date = `date +"%Y%m%d"`;
 	chomp($date);
 
-	$text=`wget $url -qO-`;
+	$text=`wget --timeout=5 $url -qO-`;
 	
 	# Prüfung ob Live rechte da sind ?
 	$URL =  $text;
@@ -125,20 +125,21 @@ sub urlparse()
 	{
 		print "New URL : $URL\n";
 		my $seite = `wget $URL -qO - | tail -n +630`;
-	    	#print $page;
+	    	print "getpage";
 		#if ( grep(/Fernsehserie/,$seite) || grep {/ Doku-Reihe /} $seite || grep {m/ Magazin /} $seite)
-		if ( grep {/Fernsehserie/} $seite or grep {/Doku-Reihe/} $seite or grep {/Magazin/} $seite )
+		if ( grep {/Fernsehserie/} $seite or grep {/Doku-Reihe/} $seite or grep {/Magazin/} $seite or grep {/Reportage/} $seite )
                 {
-                        print "Keyword found";
+                        print "P";
                         $pass=1;
                 }
                 else
                 {
-                        $pass=0;
+                	print "N";
+		        $pass=0;
                 }
 	        if ( grep{/Als Live verfügbar: nein/}$seite)
 		{
-	    	  	print "Keine Rechte";
+	    	  	print "R";
 	      		$rechte=1;
 	      	}
 		else
