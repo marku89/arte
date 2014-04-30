@@ -50,7 +50,7 @@ while (1)
 		#my $out=`ls $ogfolder/*$filename`;
 		#print "--outist: $out --- \n";
 		#exit;
-		if ( $pass == 0 )
+		if ( $pass == 0 && $filename )
 		{
 			if ( `ls $ogfolder/*$filename 2> /dev/null` && !`grep $filename exclude` )
 			{
@@ -115,7 +115,8 @@ sub urlparse()
 	chomp($date);
 
 	$text=`wget --timeout=5 $url -qO-`;
-	
+       # Json dump , debug
+        $json = $text;	
 	# Prüfung ob Live rechte da sind ?
 	$URL =  $text;
 	$URL =~ s/.*VUP":"//;
@@ -129,17 +130,17 @@ sub urlparse()
 		#if ( grep(/Fernsehserie/,$seite) || grep {/ Doku-Reihe /} $seite || grep {m/ Magazin /} $seite)
 		if ( grep {/Fernsehserie/} $seite or grep {/Doku-Reihe/} $seite or grep {/Magazin/} $seite or grep {/Reportage/} $seite )
                 {
-                        print "P";
+                        print "!P!";
                         $pass=1;
                 }
                 else
                 {
-                	print "N";
+                	print "!N!";
 		        $pass=0;
                 }
 	        if ( grep{/Als Live verfügbar: nein/}$seite)
 		{
-	    	  	print "R";
+	    	  	print "!R!";
 	      		$rechte=1;
 	      	}
 		else
@@ -161,6 +162,8 @@ sub urlparse()
 	$text =~ s/\(/_/g;
 	$text =~ s/\)/_/g;
 	$text =~ s/\//_/g;
+	$text =~ s/\?//g;
+	$text =~ s/\&//g;
 
     	# get Arte ID
 	$ID = $text;
@@ -176,8 +179,6 @@ sub urlparse()
 	$file =~ s/".*/.mp4/;
 	$filename=$file;
 	$file = "$date-$ID-$file";
-	# Json dump , debug
-	$json = $text;
 	# Meta daten 
 	$meta = $text;
 	$meta =~ s/.*"VDE":"//; 
