@@ -18,13 +18,29 @@ $i =~ s/_/ /g;
 $i =~ s/^-//;
 
 #print "--$i--\n";
-my $URL = `cat $ARGV[0].meta.txt | grep "{lang"`;
+my $URL = `cat $ARGV[0].meta.txt | grep {`;
+$IMG = $URL;
 $URL =~ s/.*VUP://;
-$URL =~ s/,VSR.*//;
+$URL =~ s/,.*//;
 $URL =~ s/_/\//g;
 chomp($URL);
 
-#print "--$URL--\n";
+$IMG =~ s/.*Image://;
+$IMG =~ s/jpg.*/jpg/;
+#$IMG =~ s/_/\//g;
+#$IMG =~ s/\/01/_01/g;
+#$IMG =~ s/0\//0_/g;
+chomp($IMG);
+#exit;
+
+print "--$IMG--$URL--\n";
+## upload image to http://imgur.com
+$imga = `wget --post-data="current_upload=1&total_uploads=1&gallery_title=Gallery+submission+title+(required)&gallery_submit=false&gallery_type=&terms=0&forceAnonymous=false&create_album=0&album_title=Optional+Album+Title&layout=b&catify=0&url=$IMG&edit_url=0" http://imgur.com/upload -qO -`;
+
+#print "--$imga--";
+$imga =~ s/.*"hash":"/http:\/\/imgur.com\//;
+$imga =~ s/".*/\.jpg/;
+$IMG = $imga ;
 
 $con = `wget -qOurl.txt $URL`;
 
@@ -55,7 +71,7 @@ chomp($dau);
 # printout data
 print "$i $date AAC 720p HDTV x264 - iND\n";
 print "[CENTER]\n[B][SIZE=\"4\"] $i [/SIZE][/B]\n";
-print "[IMG][/IMG]\n";
+print "[IMG]$IMG [/IMG]\n";
 print "[B]# Beschreibung[/B]\n";
 print "$text1";
 print "$text2";

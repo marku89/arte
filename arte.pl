@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # Download for arte files 
 # wget http://arte.tv/papi/tvguide/videos/livestream/player/D/
-
+# v0.8.1
 use strict;
 use warnings;
 
@@ -29,6 +29,12 @@ my $url="http://arte.tv/papi/tvguide/videos/livestream/player/D/";
 # get init url
 my $text;
 my $filename;
+
+if ( @ARGV ) 
+{
+	print "No Arguments NEEDED\n arte.pl v0.8.1\n\n";
+	exit 1;
+}
 
 `mkdir -p $ogfolder`;
 
@@ -76,7 +82,7 @@ while (1)
                 print "gotopidchecki\n";
                 &killoldpid();
 
-		`echo "rtmpdump -v -r \\\"rtmp://artestras.fc.llnwd.net/artestras/s_artestras_scst_geoFRDE_de?s=1320220800&h=878865258ebb8eaa437b99c3c7598998\\\" -o $ogfolder/$file" > /tmp/run.sh`; 
+		`echo "rtmpdump -v -r \\\"rtmp://artestras.fc.llnwd.net/artestras/s_artestras_scst_geoFRDE_de?s=1320220800&h=878865258ebb8eaa437b99c3c7598998\\\" -o \\\"$ogfolder/$file\\\"" > /tmp/run.sh`; 
 		system("screen -dmS $ID-rtmp bash /tmp/run.sh"); # start the ffmpeg dump detached 
 		# write Metadata
 		chomp($meta);
@@ -164,7 +170,10 @@ sub urlparse()
 	$text =~ s/\//_/g;
 	$text =~ s/\?//g;
 	$text =~ s/\&//g;
-
+	#$text =~ s/\'//g;	
+	#$text =~ s/\://g;
+	#$text =~ s/\"//g;
+	
     	# get Arte ID
 	$ID = $text;
 	$ID =~ s/.*IID":"//;
@@ -177,6 +186,11 @@ sub urlparse()
 	$file = $text;
 	$file =~ s/.*"VTI":"//;
 	$file =~ s/".*/.mp4/;
+        $file =~ s/\'//g;      
+        $file =~ s/\://g;
+        $file =~ s/\"//g;
+
+
 	$filename=$file;
 	$file = "$date-$ID-$file";
 	# Meta daten 
