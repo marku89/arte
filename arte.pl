@@ -8,7 +8,7 @@ use warnings;
 
 my $file; # filename to write 
 my $ogfolder="/arte/stream"; # folder to store
-my $exclude="exclude"; # exclude list from doublicate checking
+my $exclude="/home/markus/arte/exclude"; # exclude list from doublicate checking
 my $old=" "; # old filename to fetch the change of the mega data 
 my $pid;
 my $meta;
@@ -22,9 +22,15 @@ my $OLDURL=" ";
 my $first=1;
 my $rechte=0;
 my $pass=0;
+my $plus=0;
+my $pjson="";
+my $path="";
+my $purl="";
+my $mp4;
 
 # url from arte !
 my $url="http://arte.tv/papi/tvguide/videos/livestream/player/D/";
+my $rtmp="rtmp://artestras.fcod.llnwd.net/a3903/o35/";
 
 # get init url
 my $text;
@@ -81,8 +87,13 @@ while (1)
 		print "INPUT2 File: $file || ID: $ID  || orgfile: $filename\n";
                 print "gotopidchecki\n";
                 &killoldpid();
-
-		`echo "rtmpdump -v -r \\\"rtmp://artestras.fc.llnwd.net/artestras/s_artestras_scst_geoFRDE_de?s=1320220800&h=878865258ebb8eaa437b99c3c7598998\\\" -o \\\"$ogfolder/$file\\\"" > /tmp/run.sh`; 
+		if ( !$plus )
+		{
+			`echo "rtmpdump -v -r \\\"rtmp://artestras.fc.llnwd.net/artestras/s_artestras_scst_geoFRDE_de?s=1320220800&h=878865258ebb8eaa437b99c3c7598998\\\" -o \\\"$ogfolder/$file\\\"" > /tmp/run.sh`; 
+		}
+		else
+		{
+			`echo "rtmpdump -r \\\"rtmp://artestras.fcod.llnwd.net/a3903/o35/\\\" --playpath \\\"$path\\\" -o \\\"$ogfolder/$file\\\"" > /tmp/run.sh`;			      }
 		system("screen -dmS $ID-rtmp bash /tmp/run.sh"); # start the ffmpeg dump detached 
 		# write Metadata
 		chomp($meta);
@@ -130,29 +141,67 @@ sub urlparse()
 	$URL =~ s/{/dummy/;
 	if ( $URL ne $OLDURL && $URL && $URL ne "dummy" )
 	{
+		# debug url 
+		#$URL = "http://www.arte.tv/guide/de/046618-019/silex-and-the-city";
 		print "New URL : $URL\n";
 		my $seite = `wget $URL -qO - | tail -n +630`;
 	    	print "getpage";
 		#if ( grep(/Fernsehserie/,$seite) || grep {/ Doku-Reihe /} $seite || grep {m/ Magazin /} $seite)
 		if ( grep {/Fernsehserie/} $seite or grep {/Doku-Reihe/} $seite or grep {/Magazin/} $seite or grep {/Reportage/} $seite )
                 {
-                        print "!P!";
+			#Ausnahme führ reihen
+                        print "!Reihe!";
                         $pass=1;
                 }
                 else
                 {
-                	print "!N!";
+			#wenn nicht !
+                	print "!KeineReihe!";
 		        $pass=0;
                 }
 	        if ( grep{/Als Live verfügbar: nein/}$seite)
 		{
-	    	  	print "!R!";
+			# wenn nicht live verfügbar
+	    	  	print "!KeineRechte!";
 	      		$rechte=1;
 	      	}
 		else
+                {
+                        $rechte=0;
+                }
+		if ( grep{/Arte\+7: \d+.*/}$seite)
 		{
-	      		$rechte=0;
-	      	}
+			if (grep {/AUSSCHNITT/}$seite)
+			{
+		                print "!Aussschnitt daher N7!\n";
+		                $plus=0;
+			}
+			else
+			{
+				print "!7+!\n";
+				$plus = 1;
+				$pjson = `wget $URL -qO - |  grep json | head -n 1`;
+				$pjson =~ s/.*arte_vp_url="//;
+				$pjson =~ s/".*//;
+				chomp($pjson);
+
+				$purl = `wget $pjson -qO - `;
+				$mp4 = $purl;
+				
+			
+				$mp4 =~ s/","videoFormat.*//;
+				$mp4 =~ s/.*Nativ.*"bitrate":2200,"streamer":"//;
+				
+				$path = $mp4;
+				$path =~ s/.*","url":"/mp4:/;
+				print "rtmpdump -r \"$rtmp\" --playpath \"$path\"\n";
+			}
+		}
+		else
+		{
+			print "!N7!\n";
+			$plus=0;
+		}
 		$OLDURL=$URL;
 		$first=1;
 	}
