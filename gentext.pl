@@ -20,13 +20,19 @@ $i =~ s/^-//;
 #print "--$i--\n";
 my $URL = `cat $ARGV[0].meta.txt | grep {`;
 $IMG = $URL;
-$URL =~ s/.*VUP://;
-$URL =~ s/,.*//;
-$URL =~ s/_/\//g;
-chomp($URL);
 
-$IMG =~ s/.*Image://;
-$IMG =~ s/jpg.*/jpg/;
+$URL =~ tr/\n//d;
+$URL =~ s/.*VUP://;
+
+$URL =~ s/,.*//g;
+#$URL =~ s/_/\//g;
+chomp($URL);
+#print "==$URL==\n";
+#exit;
+
+$IMG =~ s/.*Image://m;
+$IMG =~ tr/\n//d;
+$IMG =~ s/,.*//g;
 #$IMG =~ s/_/\//g;
 #$IMG =~ s/\/01/_01/g;
 #$IMG =~ s/0\//0_/g;
@@ -69,11 +75,31 @@ $dau = `grep -A 2 time-row url.txt | grep "(" | head -n 1 | sed 's/.*(//;s/).*//
 chomp($dau);
 #print "==$dau==";
 # printout data
-print "$i $date AAC 720p HDTV x264 - iND\n";
-print "[CENTER]\n[B][SIZE=\"4\"] $i [/SIZE][/B]\n";
-print "[IMG]$IMG [/IMG]\n";
-print "[B]# Beschreibung[/B]\n";
-print "$text1";
-print "$text2";
-print "[url=$URL]ARTE[/url]\n[CODE]\n* Arte Stream \n$text3 \n* Größe: $size \n* Dauer: $dau \n* Hoster: Uploaded.to, Share-Online.biz, Filemonkey.in\n[/CODE]\n\n[B]# Download [/B]";
-print "[spoiler]\n[url=htt]Uploaded[/url]\n[url=http]Share-Online[/url]\n[url=http]Filemonkey.in[/url]\n[/spoiler]\n[/CENTER]";
+foreach my $in (@ARGV)
+{
+	print "\n$in\n";
+
+	if ( $in eq "boerse" )
+	{
+	print "$i $date AAC 720p HDTV x264 - Mar\n";
+	print "[CENTER]\n[B][SIZE=\"4\"] $i [/SIZE][/B]\n";
+	print "[IMG]$IMG [/IMG]\n";
+	print "[B]# Beschreibung[/B]\n";
+	print "$text1";
+	print "$text2";
+	print "[url=$URL]ARTE[/url]\n[CODE]\n* Arte Stream \n$text3 \n* Größe: $size \n* Dauer: $dau \n* Hoster: Uploaded.to, Share-Online.biz,\n[/CODE]\n\n[B]# Download [/B]";
+	print "[spoiler]\n[url=htt]Uploaded[/url]\n[url=http]Share-Online[/url]\n[url=http]Filemonkey.in[/url]\n[/spoiler]\n[/CENTER]\n";
+	exit;
+	}
+	if ( $in eq "warez")
+	{
+	print "$i $date AAC 720p HDTV x264 - Mar\n";
+	print "[align=center]\n[B][size=large] $i [/size][/B]\n\n\n";
+	print "[IMG]$IMG [/IMG]\n\n\n";
+	print "[B]# Beschreibung[/B]\n\n";
+	print "$text1";
+	print "$text2\n\n\n";
+	print "[url=$URL]ARTE[/url]\n[CODE]\n* Arte Stream \n$text3 \n* Größe: $size \n* Dauer: $dau \n* Hoster: Uploaded.to, Share-Online.biz, \n[/CODE]\n\n[B]# Download [/B]";
+	print "[hide]\n[url=htt]Uploaded[/url]\n[url=http]Share-Online[/url]\n[url=http]Filemonkey.in[/url]\n[/hide]\n[/align]\n";
+	}
+}
