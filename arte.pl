@@ -233,13 +233,14 @@ sub urlparse()
 	}
 	# dateinamen erzeugung
 	$file = $text;
+	#print "==FILEIST:$file==";	
 	$file =~ s/.*"VTI":"//;
-	$file =~ s/".*/.mp4/;
-        $file =~ s/\'//g;      
-        $file =~ s/\://g;
-        $file =~ s/\"//g;
-
-
+	$file =~ s/,.*/.mp4/;
+        $file =~ s/'//g;      
+        $file =~ s/://g;
+        $file =~ s/"//g;
+	#print "==FILEIST:$file==";
+	
 	$filename=$file;
 	$file = "$date-$ID-$file";
 	# Meta daten 

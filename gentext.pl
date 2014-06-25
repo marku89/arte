@@ -87,8 +87,8 @@ foreach my $in (@ARGV)
 	print "[B]# Beschreibung[/B]\n";
 	print "$text1";
 	print "$text2";
-	print "[url=$URL]ARTE[/url]\n[CODE]\n* Arte Stream \n$text3 \n* Größe: $size \n* Dauer: $dau \n* Hoster: Uploaded.to, Share-Online.biz,\n[/CODE]\n\n[B]# Download [/B]";
-	print "[spoiler]\n[url=htt]Uploaded[/url]\n[url=http]Share-Online[/url]\n[url=http]Filemonkey.in[/url]\n[/spoiler]\n[/CENTER]\n";
+	print "[url=$URL]ARTE[/url]\n[CODE]\n* Arte Stream \n$text3 \n* Größe: $size \n* Dauer: $dau \n* Hoster: Uploaded.to, Share-Online.bin\n[/CODE]\n\n[B]# Download [/B]";
+	print "[spoiler]\n[url=htt]Uploaded[/url]\n[url=http]Share-Online[/url]\n[/spoiler]\n[/CENTER]\n";
 	exit;
 	}
 	if ( $in eq "warez")
@@ -99,7 +99,7 @@ foreach my $in (@ARGV)
 	print "[B]# Beschreibung[/B]\n\n";
 	print "$text1";
 	print "$text2\n\n\n";
-	print "[url=$URL]ARTE[/url]\n[CODE]\n* Arte Stream \n$text3 \n* Größe: $size \n* Dauer: $dau \n* Hoster: Uploaded.to, Share-Online.biz, \n[/CODE]\n\n[B]# Download [/B]";
-	print "[hide]\n[url=htt]Uploaded[/url]\n[url=http]Share-Online[/url]\n[url=http]Filemonkey.in[/url]\n[/hide]\n[/align]\n";
+	print "[url=$URL]ARTE[/url]\n[CODE]\n* Arte Stream \n$text3 \n* Größe: $size \n* Dauer: $dau \n* Hoster: Uploaded.to, Share-Online.biz \n[/CODE]\n\n[B]# Download [/B]";
+	print "[hide]\n[url=htt]Uploaded[/url]\n[url=http]Share-Online[/url]\n[/hide]\n[/align]\n";
 	}
 }
