@@ -181,20 +181,29 @@ sub urlparse()
 				print "!7+!\n";
 				$plus = 1;
 				$pjson = `wget $URL -qO - |  grep json | head -n 1`;
-				$pjson =~ s/.*arte_vp_url="//;
-				$pjson =~ s/".*//;
-				chomp($pjson);
+				if ( $pjson =~ m/script type=/ )
+				{
+		                        print "!N7!\n";
+        		                $plus=0;
+				}
+				else 
+				{
+					$pjson =~ s/.*arte_vp_url="//;
+					$pjson =~ s/".*//;
+					chomp($pjson);
 
-				$purl = `wget $pjson -qO - `;
-				$mp4 = $purl;
+					$purl = `wget $pjson -qO - `;
+					print "==$purl==$pjson";
+					$mp4 = $purl;
 				
 			
-				$mp4 =~ s/","videoFormat.*//;
-				$mp4 =~ s/.*Nativ.*"bitrate":2200,"streamer":"//;
-				
-				$path = $mp4;
-				$path =~ s/.*","url":"/mp4:/;
-				print "rtmpdump -r \"$rtmp\" --playpath \"$path\"\n";
+					$mp4 =~ s/","videoFormat.*//;
+					$mp4 =~ s/.*Nativ.*"bitrate":2200,"streamer":"//;
+					
+					$path = $mp4;
+					$path =~ s/.*","url":"/mp4:/;
+					print "rtmpdump -r \"$rtmp\" --playpath \"$path\"\n";
+				}
 			}
 		}
 		else
