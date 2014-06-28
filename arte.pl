@@ -9,7 +9,7 @@ use warnings;
 
 
 my $file; # filename to write 
-my $olgasfolder="/home/markus/arte/stream"; # folder to store
+my $ogfolder="/home/ftp/share/arte"; # folder to store
 my $old=" "; # old filename to fetch the change of the mega data 
 my $stream; # stream m3u8 url
 my $pid;
@@ -24,7 +24,7 @@ my $maps="-map 0.2 -map 0.3"; #low quali
 # get init url
 my $text;
 
-`mkdir -p /home/markus/arte/stream/`;
+`mkdir -p $ogfolder`;
 # parse the url
 &urlparse();
 
@@ -34,11 +34,11 @@ while (1)
 	if ($file ne $old)
 	{
 		print "Next File: $file || ID: $ID \n";
-		#`echo "ffmpeg $maps -i $stream -strict experimental $olgasfolder/$ID-$file" > /tmp/run.sh`; # writing it to a tmp sh file , because screen have problems with lots of arguement (fix me)
-		`echo "rtmpdump -v -r \\\"rtmp://artestras.fc.llnwd.net/artestras/s_artestras_scst_geoFRDE_de?s=1320220800&h=878865258ebb8eaa437b99c3c7598998\\\" -o $olgasfolder/$ID-$file" > /tmp/run.sh`; 
+		#`echo "ffmpeg $maps -i $stream -strict experimental $ogfolder/$ID-$file" > /tmp/run.sh`; # writing it to a tmp sh file , because screen have problems with lots of arguement (fix me)
+		`echo "rtmpdump -v -r \\\"rtmp://artestras.fc.llnwd.net/artestras/s_artestras_scst_geoFRDE_de?s=1320220800&h=878865258ebb8eaa437b99c3c7598998\\\" -o $ogfolder/$ID-$file" > /tmp/run.sh`; 
 		system("screen -dmS $ID-rtmp sh /tmp/run.sh"); # start the ffmpeg dump detached 
 		sleep 20; # wait so that the stream can start and wie capture some overlapping .
-		$pid = `ps aux | grep rtmp | grep $file | awk '{print \$2}' | head -n 1`; # get the current screen pid
+		$pid = `ps aux | grep rtmp | grep "$file" | awk '{print \$2}' | head -n 1`; # get the current screen pid
 		chomp($pid);
 		print "dritter mit PID $pid\n";
 		if ( $oldpid ne 0 ) 
@@ -52,7 +52,7 @@ while (1)
 		}
 		# write Metadata
 		chomp($meta);
-		`echo "$meta" >  $olgasfolder/$ID-$file.meta.txt`;
+		`echo "$meta" >  "$ogfolder/$ID-$file.meta.txt"`;
 		# debug output
 		print "runed: PID $pid , OLD $oldpid, ID $ID \n";
 		$oldpid = $pid; # for the next round 
@@ -71,6 +71,9 @@ sub urlparse()
 
 	$text=`wget $url -qO-`;
 	$text =~ s/ /_/g;
+	$text =~ s/\(/_/g;
+	$text =~ s/\)/_/g;
+	$text =~ s/\//_/g;
 	
 	$file = $text;
 	$file =~ s/.*"VTI":"//;
