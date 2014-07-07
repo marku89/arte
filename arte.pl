@@ -111,18 +111,18 @@ while (1)
 sub killoldpid()
 {
 	print "get the current screen pid";
-	$pid = `pidof rtmpdump`;
+	$pid = `ps aux | grep rtmpdump | grep -v grep | grep 1320220800 | sed 's/root\\s\\+//g' | cut -d " " -f1`;
 	chomp($pid);
 	if ( $pid )
         {
             `killall -2 rtmpdump`;
 	     sleep 2;
-	     if ( `pidof rtmpdump` )
+	     if ( `ps aux | grep rtmpdump | grep -v grep | grep 1320220800 | sed 's/root\\s\\+//g' | cut -d " " -f1` )
 	     {
 		#killardly
             	`killall rtmpdump`;
 	     }
-            print "\nkilled rtmpdump\n";
+            print "\nkilled rtmpdump with pid $pid\n";
         }
 }
 
