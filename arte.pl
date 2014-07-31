@@ -177,6 +177,7 @@ sub urlparse()
 			$plus = 1;
 			$pjson = `wget $URL -qO - |  grep json | head -n 1`;
 			if ( $pjson =~ m/script type=/ )
+			#if ( $pjson =~ m/"VTX":"AUSSCHNITT"/ )
 			{
 		                print "!N7!\n";
         	                $plus=0;
@@ -186,19 +187,27 @@ sub urlparse()
 				$pjson =~ s/.*arte_vp_url="//;
 				$pjson =~ s/".*//;
 				chomp($pjson);
-
+				#$pjson = "http://arte.tv/papi/tvguide/videos/stream/player/D/048724-000_EXTRAIT-D/ALL/ALL.json";
 				$purl = `wget $pjson -qO - `;
 				#print "==$purl==$pjson";
-				$mp4 = $purl;
-			
-				$mp4 =~ s/.*HTTP_MP4_SQ_1//;
-				$mp4 =~ s/}.*//;
-					
-				$path = $mp4;
-				$path =~ s/.*,"url":"//;
-				$path =~ s/".*//;
+				if ( $purl =~ m/"VTX":"AUSSCHNITT"/ )
+				{
+					print "NUR Ausschnitt !!!!!\n";
+					$plus=0;
+				}
+				else
+				{
+					$mp4 = $purl;
+				
+					$mp4 =~ s/.*HTTP_MP4_SQ_1//;
+					$mp4 =~ s/}.*//;
+						
+					$path = $mp4;
+					$path =~ s/.*,"url":"//;
+					$path =~ s/".*//;
 
-				print "wget \"$path\" -c -O \$file\n";
+					print "wget \"$path\" -c -O \$file\n";
+				}
 			}
 		}
 		else
@@ -216,6 +225,7 @@ sub urlparse()
               $filename="notlive";
               return;	
 	}
+	exit
 	# text umbau so das keine probleme enstehen beim parsen
 	$text =~ s/ /_/g;
 	$text =~ s/\(/_/g;
