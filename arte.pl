@@ -94,7 +94,7 @@ while (1)
 		}
 		else
 		{
-			`echo "rtmpdump -r \\\"rtmp://artestras.fcod.llnwd.net/a3903/o35/\\\" --playpath \\\"$path\\\" -o \\\"$ogfolder/$file\\\"" > /tmp/run.sh`;			      
+			`echo "wget \\\"$path\\\" -c -O $file" > /tmp/run.sh`;			      
 		}
 		system("screen -dmS $ID-rtmp bash /tmp/run.sh"); # start the ffmpeg dump detached 
 		# write Metadata
@@ -191,13 +191,14 @@ sub urlparse()
 				#print "==$purl==$pjson";
 				$mp4 = $purl;
 			
-		
-				$mp4 =~ s/","videoFormat.*//;
-				$mp4 =~ s/.*Nativ.*"bitrate":2200,"streamer":"//;
-				
+				$mp4 =~ s/.*HTTP_MP4_SQ_1//;
+				$mp4 =~ s/}.*//;
+					
 				$path = $mp4;
-				$path =~ s/.*","url":"/mp4:/;
-				print "rtmpdump -r \"$rtmp\" --playpath \"$path\"\n";
+				$path =~ s/.*,"url":"//;
+				$path =~ s/".*//;
+
+				print "wget \"$path\" -c -O \$file\n";
 			}
 		}
 		else
