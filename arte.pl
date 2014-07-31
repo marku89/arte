@@ -62,9 +62,10 @@ while (1)
 		#my $out=`ls $ogfolder/*$filename`;
 		#print "--outist: $out --- \n";
 		#exit;
-		if ( $pass == 0 && $filename )
+		#if ( $pass == 0 && $filename )
+		if ( $filename )
 		{
-			if ( `ls $ogfolder/*$filename 2> /dev/null` && !`grep $filename exclude` )
+			if ( `ls $ogfolder/*-$ID* 2> /dev/null` && !`grep $filename exclude` )
 			{
 			print "e";
 		 	sleep 1;
@@ -93,7 +94,8 @@ while (1)
 		}
 		else
 		{
-			`echo "rtmpdump -r \\\"rtmp://artestras.fcod.llnwd.net/a3903/o35/\\\" --playpath \\\"$path\\\" -o \\\"$ogfolder/$file\\\"" > /tmp/run.sh`;			      }
+			`echo "rtmpdump -r \\\"rtmp://artestras.fcod.llnwd.net/a3903/o35/\\\" --playpath \\\"$path\\\" -o \\\"$ogfolder/$file\\\"" > /tmp/run.sh`;			      
+		}
 		system("screen -dmS $ID-rtmp bash /tmp/run.sh"); # start the ffmpeg dump detached 
 		# write Metadata
 		chomp($meta);
@@ -169,41 +171,33 @@ sub urlparse()
                 {
                         $rechte=0;
                 }
-		if ( grep{/Arte\+7: \d+.*/}$seite)
+		if ( !grep{/Arte\+7: nein/}$seite)
 		{
-			if (grep {/AUSSCHNITT/}$seite)
+			print "!7+!\n";
+			$plus = 1;
+			$pjson = `wget $URL -qO - |  grep json | head -n 1`;
+			if ( $pjson =~ m/script type=/ )
 			{
-		                print "!Aussschnitt daher N7!\n";
-		                $plus=0;
+		                print "!N7!\n";
+        	                $plus=0;
 			}
-			else
+			else 
 			{
-				print "!7+!\n";
-				$plus = 1;
-				$pjson = `wget $URL -qO - |  grep json | head -n 1`;
-				if ( $pjson =~ m/script type=/ )
-				{
-		                        print "!N7!\n";
-        		                $plus=0;
-				}
-				else 
-				{
-					$pjson =~ s/.*arte_vp_url="//;
-					$pjson =~ s/".*//;
-					chomp($pjson);
+				$pjson =~ s/.*arte_vp_url="//;
+				$pjson =~ s/".*//;
+				chomp($pjson);
 
-					$purl = `wget $pjson -qO - `;
-					print "==$purl==$pjson";
-					$mp4 = $purl;
-				
+				$purl = `wget $pjson -qO - `;
+				#print "==$purl==$pjson";
+				$mp4 = $purl;
 			
-					$mp4 =~ s/","videoFormat.*//;
-					$mp4 =~ s/.*Nativ.*"bitrate":2200,"streamer":"//;
-					
-					$path = $mp4;
-					$path =~ s/.*","url":"/mp4:/;
-					print "rtmpdump -r \"$rtmp\" --playpath \"$path\"\n";
-				}
+		
+				$mp4 =~ s/","videoFormat.*//;
+				$mp4 =~ s/.*Nativ.*"bitrate":2200,"streamer":"//;
+				
+				$path = $mp4;
+				$path =~ s/.*","url":"/mp4:/;
+				print "rtmpdump -r \"$rtmp\" --playpath \"$path\"\n";
 			}
 		}
 		else
