@@ -225,7 +225,6 @@ sub urlparse()
               $filename="notlive";
               return;	
 	}
-	exit
 	# text umbau so das keine probleme enstehen beim parsen
 	$text =~ s/ /_/g;
 	$text =~ s/\(/_/g;
