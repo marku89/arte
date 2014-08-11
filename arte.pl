@@ -26,7 +26,7 @@ my $plus=0;
 my $pjson="";
 my $path="";
 my $purl="";
-my $mp4;
+my ($mp4,$seite);
 
 # url from arte !
 my $url="http://arte.tv/papi/tvguide/videos/livestream/player/D/";
@@ -36,9 +36,20 @@ my $rtmp="rtmp://artestras.fcod.llnwd.net/a3903/o35/";
 my $text;
 my $filename;
 
+if ( `cat /var/lock/arte` )
+{
+	print "arte collector runs !!";
+	exit 1;
+}
+else
+{
+	`echo "runs" > /var/lock/arte`;
+}
+
+
 if ( @ARGV ) 
 {
-	print "No Arguments NEEDED\n arte.pl v0.8.1\n\n";
+	print "No Arguments NEEDED\n arte.pl v0.8.2\n\n";
 	exit 1;
 }
 
@@ -85,16 +96,20 @@ while (1)
 			next;
 		}
 		# Wenn keine fehler oder doppelungen aufgetreten sind , dann wird aufgenommen
-		print "INPUT2 File: $file || ID: $ID  || orgfile: $filename\n";
+		print "INPUT2 File: $file || ID: $ID  || orgfile: $filename || ??Plus = $plus\n";
                 print "gotopidchecki\n";
                 &killoldpid();
-		if ( !$plus )
+		if ( !$plus && $rechte )
 		{
 			`echo "rtmpdump -v -r \\\"rtmp://artestras.fc.llnwd.net/artestras/s_artestras_scst_geoFRDE_de?s=1320220800&h=878865258ebb8eaa437b99c3c7598998\\\" -o \\\"$ogfolder/$file\\\"" > /tmp/run.sh`; 
 		}
-		else
+		elsif ( $rechte ) 
 		{
-			`echo "wget \\\"$path\\\" -c -O $file" > /tmp/run.sh`;			      
+			`echo "wget \\\"$path\\\" -c -O $ogfolder/$file" > /tmp/run.sh`;			      
+		}
+		else 
+		{
+			next;
 		}
 		system("screen -dmS $ID-rtmp bash /tmp/run.sh"); # start the ffmpeg dump detached 
 		# write Metadata
@@ -144,9 +159,9 @@ sub urlparse()
 	if ( $URL ne $OLDURL && $URL && $URL ne "dummy" )
 	{
 		# debug url 
-		#$URL = "http://www.arte.tv/guide/de/046618-019/silex-and-the-city";
+		#$URL = "http://www.arte.tv/guide/de/050327-000/der-killerwal";
 		print "New URL : $URL\n";
-		my $seite = `wget $URL -qO - | tail -n +630`;
+		$seite = `wget $URL -qO - | tail -n +630`;
 	    	print "getpage";
 		#if ( grep(/Fernsehserie/,$seite) || grep {/ Doku-Reihe /} $seite || grep {m/ Magazin /} $seite)
 		if ( grep {/Fernsehserie/} $seite or grep {/Doku-Reihe/} $seite or grep {/Magazin/} $seite or grep {/Reportage/} $seite )
@@ -165,11 +180,11 @@ sub urlparse()
 		{
 			# wenn nicht live verfügbar
 	    	  	print "!KeineRechte!";
-	      		$rechte=1;
+	      		$rechte=0;
 	      	}
 		else
                 {
-                        $rechte=0;
+                        $rechte=1;
                 }
 		if ( !grep{/Arte\+7: nein/}$seite)
 		{
@@ -187,13 +202,15 @@ sub urlparse()
 				$pjson =~ s/.*arte_vp_url="//;
 				$pjson =~ s/".*//;
 				chomp($pjson);
+				print "GET $pjson \n";
 				#$pjson = "http://arte.tv/papi/tvguide/videos/stream/player/D/048724-000_EXTRAIT-D/ALL/ALL.json";
 				$purl = `wget $pjson -qO - `;
 				#print "==$purl==$pjson";
-				if ( $purl =~ m/"VTX":"AUSSCHNITT"/ )
+				if ( $purl =~ m/AUSSCHNITT/ || $purl =~ m/TRAILER/ )
 				{
 					print "NUR Ausschnitt !!!!!\n";
 					$plus=0;
+					$rechte=0;
 				}
 				else
 				{
@@ -218,7 +235,7 @@ sub urlparse()
 		$OLDURL=$URL;
 		$first=1;
 	}
-	if ( $rechte == 1 )
+	if ( $rechte == 0 )
 	{
 	      print "n";
               $file="notlive";
@@ -231,19 +248,21 @@ sub urlparse()
 	$text =~ s/\)/_/g;
 	$text =~ s/\//_/g;
 	$text =~ s/\?//g;
-	$text =~ s/\&//g;
+	$text =~ s/!//g;
+	$text =~ s/&//g;
 	#$text =~ s/\'//g;	
 	#$text =~ s/\://g;
 	#$text =~ s/\"//g;
 	
     	# get Arte ID
 	$ID = $text;
-	$ID =~ s/.*IID":"//;
+	$ID =~ s/.*VPI":"//;
 	$ID =~ s/".*//;
 	if ( $ID eq "{" )
 	{
 		$ID = 0;
 	}
+	$ID =~ s/-/_/;
 	# dateinamen erzeugung
 	$file = $text;
 	#print "==FILEIST:$file==";	
