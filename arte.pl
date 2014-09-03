@@ -86,7 +86,7 @@ while (1)
 			next;
 			}
 		}
-		if ( $file =~ m/.*Live\.mp4/ ||  $file =~ m/.*ARTE_Journal\.mp4/ || $file eq "notlive" ) 
+		if ( $file =~ m/.*Live\.mp4/ ||  $file =~ m/.*ARTE_Journal\.mp4/ || $file eq "notlive" || $ID eq 0 ) 
 		{
 		        print "l";
 		        sleep 1;
@@ -159,7 +159,7 @@ sub urlparse()
 	if ( $URL ne $OLDURL && $URL && $URL ne "dummy" )
 	{
 		# debug url 
-		#$URL = "http://www.arte.tv/guide/de/050327-000/der-killerwal";
+		#$URL = "http://www.arte.tv/guide/de/051090-003/x-enius";
 		print "New URL : $URL\n";
 		$seite = `wget $URL -qO - | tail -n +630`;
 	    	print "getpage";
@@ -190,11 +190,11 @@ sub urlparse()
 		{
 			print "!7+!\n";
 			$plus = 1;
-			$pjson = `wget $URL -qO - |  grep json | head -n 1`;
-			if ( $pjson =~ m/script type=/ )
+			$pjson = `wget $URL -qO - |  grep json | grep PLUS7 | head -n 1`;
+			if ( $pjson =~ m/script type=/ | !$pjson )
 			#if ( $pjson =~ m/"VTX":"AUSSCHNITT"/ )
 			{
-		                print "!N7!\n";
+		                print "!NO7!\n";
         	                $plus=0;
 			}
 			else 
@@ -202,6 +202,12 @@ sub urlparse()
 				$pjson =~ s/.*arte_vp_url="//;
 				$pjson =~ s/".*//;
 				chomp($pjson);
+				if (!$json || $json =~ m/script type/)
+				{
+				        print "Parseerror or OLD 7+ !!! \n\n";
+	                                $plus=0;
+                                        $rechte=0;
+				}
 				print "GET $pjson \n";
 				#$pjson = "http://arte.tv/papi/tvguide/videos/stream/player/D/048724-000_EXTRAIT-D/ALL/ALL.json";
 				$purl = `wget $pjson -qO - `;
@@ -210,7 +216,6 @@ sub urlparse()
 				{
 					print "NUR Ausschnitt !!!!!\n";
 					$plus=0;
-					$rechte=0;
 				}
 				else
 				{
@@ -258,7 +263,7 @@ sub urlparse()
 	$ID = $text;
 	$ID =~ s/.*VPI":"//;
 	$ID =~ s/".*//;
-	if ( $ID eq "{" )
+	if ( $ID eq "{" || !$ID )
 	{
 		$ID = 0;
 	}
