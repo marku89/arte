@@ -29,3 +29,8 @@ Zum aufzeichnen arte.pl im scren laufen aufm Server
 7 Plus:
 In cron eintragen damit es jeden Morgen läuft.
 	0 5 * * * /usr/bin/perl /home/markus/arte/arte-7plus.pl
+
+Einzelne Sendungen:
+Wichtig ist das man die Arte URL ohne ? und vollständig angibt in Anführungszeichen !
+	perl parsebehind.pl "http://www.arte.tv/guide/de/048727-003/x-enius"
+	
