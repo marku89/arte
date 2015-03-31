@@ -123,7 +123,7 @@ chomp($meta);
 `echo \"$meta\n\n\" > $ogfolder/$file.meta.txt`;
 `echo $json >> $ogfolder/$file.meta.txt`;
 
-print "wget \"$path\" -c -O $file >> /tmp/wget-log\n";
+#print "wget \"$path\" -c -O $file >> /tmp/wget-log\n";
 `echo \"wget $path -c -O $file\" >> /tmp/wget-log`;
 `wget "$path" -c -O $file`;
 if ( $data ) # wenn ein alter file verwendet wurde
