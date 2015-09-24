@@ -15,23 +15,36 @@ my @liste = `ls $ogfolder/*meta.txt`;
 
 foreach	my $line (@liste)
 {
+	print "\n\n#####\n";
 	# reset vars
 	$folder="sortme";
 	chomp ($line);
 	print "$line\n";
-	#$url = `cat $line |  grep {  | sed 's/.*VUP://;s/,.*//' | grep http`;
 	# get genre:Kurzfilm
 	$folder = `cat $line |  grep {  | grep genre | sed 's/.*genre://;s/,.*//'`;
 	chomp($folder);
-	print"$folder\n\n";
+	print"$folder\n";
 	if (! $folder || $folder =~ m/^{/ )
 	{
-		print "failure at $line\n take sortme\n";
-		$folder="sortme";
+		# TEST online genre status
+		$url = `cat $line |  grep {  | sed 's/.*VUP://;s/,.*//' | grep http`;
+		print "==$url==";
+		my $keyword="badge-trailer";
+		my $getl = `wget -qO- "$url" | grep content-metadata -A3 | grep "collapse in" -A3 | grep -v "<"`;
+		print "==$getl==";
+		chomp($getl);
+		$folder=$getl;
+		#print "i--$getl--a";
+		#exit;
+		if (! $folder )
+		{
+			print "failure at $line\n take sortme\n";
+			$folder="sortme";
+		}
 	}
 	`mkdir -p $folder`;
 	my $name = $line ;
 	$name =~ s/\.meta\.txt//;
-	print "mv $name* $ogfolder/$folder/\n\n";
+	print "mv $name* $ogfolder/$folder/\n";
 	`mv $name* $ogfolder/$folder/`;
 }
