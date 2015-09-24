@@ -8,6 +8,7 @@ use warnings;
 use strict;
 my $date;
 my $ogfolder="/arte/stream";
+my $homefolder="/home/markus/arte"
 my $ID;
 
 
@@ -52,7 +53,7 @@ foreach my $line (@liste)
 		if ( ! `find $ogfolder -name "*$ID*.mp4" 2> /dev/null` )
 		{
 			print "NO $line found ... Download\n";
-			`echo "cd $ogfolder; /home/markus/arte/parsebehind.pl \\\"http://www.arte.tv$line\\\" " > /tmp/run7.sh`;
+			`echo "cd $ogfolder; $homefolder/parsebehind.pl \\\"http://www.arte.tv$line\\\" " > /tmp/run7.sh`;
 			system("screen -dmS $ID-rtmp bash /tmp/run7.sh"); # start the ffmpeg dump detached 
 			sleep 3;
 		}
