@@ -8,7 +8,7 @@ use warnings;
 use strict;
 my $date;
 my $ogfolder="/arte/stream";
-my $homefolder="/home/markus/arte"
+my $homefolder="/home/markus/arte";
 my $ID;
 
 
