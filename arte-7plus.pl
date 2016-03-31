@@ -44,7 +44,8 @@ foreach my $line (@liste)
 		$ID =~ s/.*de\///;
 		$ID =~ s/\/.*//;
 		$ID =~ s/-/_/;
-		#print "$ID\n";
+		#print "-$ID-\n";
+		#exit;
 		if ( !$ID )
 		{
 			print "ID is leer\n";
@@ -52,10 +53,12 @@ foreach my $line (@liste)
 		}
 		if ( ! `find $ogfolder -name "*$ID*.mp4" 2> /dev/null` )
 		{
-			print "NO $line found ... Download\n";
+			print "\nNO --$line-- found ... Download\n";
 			`echo "cd $ogfolder; $homefolder/parsebehind.pl \\\"http://www.arte.tv$line\\\" " > /tmp/run7.sh`;
+			print "$homefolder/parsebehind.pl \"http://www.arte.tv$line\"";
 			system("screen -dmS $ID-rtmp bash /tmp/run7.sh"); # start the ffmpeg dump detached 
-			sleep 3;
+			sleep 1;
+			`rm /tmp/run7.sh`;
 		}
 	}		
 }

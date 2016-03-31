@@ -36,35 +36,38 @@ if ( $rechte )
 	exit;
 }
 
+my $AID = $i;
+$AID =~ s/.*de\///;
+$AID =~ s/\/.*//;
 
-my $json = `wget $i -qO - |  grep json | head -n 1`;
-$json =~ s/.*arte_vp_url='//; 
-$json =~ s/'.*//; 
-chomp($json);
+print " \n $AID \n";
+my $json = `wget https://api.arte.tv/api/player/v1/config/de/$AID?platform=ARTEPLUS7 -qO - `;
 
-if (!$json || $json =~ m/script type/)
-{
-	print "wgetfailure !!! \n\n";
-	exit;
-}
-print "$json";
-my $url = `wget $json -qO - `;
-
-if ( grep { /AUSSCHNITT/  } $url ) 
+if ( grep { /AUSSCHNITT/  } $json ) 
 {
         print "only AUSSCHNITT , no download !\n";
         exit;
 }
 
-my $mp4 = $url;
-$mp4 =~ s/.*HTTP_MP4_SQ_1//;
-$mp4 =~ s/}.*//;
+# cleare json
+$json =~ s/\\\//\//g;
+$json =~ s/\(//g;
+$json =~ s/\)//g;
+$json =~ s/'//g;
 
-my $path = $mp4;
-$path =~ s/.*,"url":"//;
-$path =~ s/".*//;
 
-if ( !$path )
+#print "$json";
+#exit
+
+my $mp4;
+$mp4 = `echo '$json' | grep "HTTP_MP4_SQ_1" -A8 | grep url | head -n1`;
+$mp4 =~ s/.*http/http/;
+$mp4 =~ s/mp4.*/mp4/;
+chomp($mp4);
+
+print "MP4: $mp4\n";
+
+if ( !$mp4 )
 {
 	print "NO URL found, no live ?\n";
 	exit;
@@ -74,61 +77,39 @@ my $date = `date +"%Y%m%d"`;
 chomp($date);
 
 # get Arte ID
-my $ID = $url;
-$ID =~ s/.*VPI":"//;
-$ID =~ s/".*//;
-if ( $ID eq "{" )
-{
-        $ID = 0;
-}
+my $ID = $AID;
 $ID =~ s/-/_/;
 
-# Json dump , debug
-$json = $url;
-# Meta daten 
-my $meta = $url;
-$meta =~ s/.*"VDE":"//;
-$meta =~ s/",".*//;
-$meta =~ s/_/ /g;
-# file backup 
-
-
-my $file = $url;
-$file  =~ s/ /_/g;
-$file  =~ s/\(/_/g;
-$file  =~ s/\)/_/g;
-$file  =~ s/\//_/g;
-$file  =~ s/\?//g;
-$file  =~ s/\&//g;
-$file  =~ s/\!//g;
-$file  =~ s/\'//g;
-$file  =~ s/\,//g;
-$file  =~ s/}//g;
-$file  =~ s/{//g;
-
-
-$file =~ s/.*"VTI":"//;
-$file =~ s/".*/.mp4/;
+my $file = `echo '$json' | grep "VTI"`;
+$file =~ s/.*"VTI": "//;
+$file =~ s/".*/\.mp4/;
+$file =~ s/ /_/g;
 $file =~ s/'//g;
 $file =~ s/://g;
 $file =~ s/"//g;
+$file =~ s/\(//g;
+$file =~ s/\)//g;
+$file =~ s/\[//g;
+$file =~ s/\]//g;
+$file =~ s/\+//g;
+$file =~ s/&//g;
+$file =~ s/\//-/g;
+$file =~ s/\\//g;
 
-
+#print "=$file= \n";
+#exit;
 
 $file = "$date-$ID-$file";
+chomp($file);
+
+print "--$file--$mp4--\n";
 
 my $ogfolder="/arte/stream";
 
-chomp($meta);
-`echo \"$meta\n\n\" > $ogfolder/$file.meta.txt`;
-`echo $json >> $ogfolder/$file.meta.txt`;
-
-#print "wget \"$path\" -c -O $file >> /tmp/wget-log\n";
-`echo \"wget $path -c -O $file\" >> /tmp/wget-log`;
-`wget "$path" -c -O $file`;
-if ( $data ) # wenn ein alter file verwendet wurde
-{
-	`rm $ARGV[0] $ARGV[0].meta.txt`;
-}
 
 
+`echo '$json' > $ogfolder/$file.meta.txt`;
+
+#print "wget \"$mp4\" -c -O $file >> /tmp/wget-log\n";
+`echo 'wget $mp4 -c -O $file' >> /tmp/wget-log`;
+`wget $mp4 -c -O $file`;
