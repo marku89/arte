@@ -95,6 +95,7 @@ $file =~ s/\+//g;
 $file =~ s/&//g;
 $file =~ s/\//-/g;
 $file =~ s/\\//g;
+$file =~ s/\///g;
 
 #print "=$file= \n";
 #exit;
@@ -111,5 +112,5 @@ my $ogfolder="/arte/stream";
 `echo '$json' > $ogfolder/$file.meta.txt`;
 
 #print "wget \"$mp4\" -c -O $file >> /tmp/wget-log\n";
-`echo 'wget $mp4 -c -O $file' >> /tmp/wget-log`;
-`wget $mp4 -c -O $file`;
+`echo 'wget $mp4 -c -O $ogfolder/$file' >> /tmp/wget-log`;
+`wget $mp4 -c -O $ogfolder/$file`;

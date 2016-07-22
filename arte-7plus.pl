@@ -44,7 +44,8 @@ foreach my $line (@liste)
 		$ID =~ s/.*de\///;
 		$ID =~ s/\/.*//;
 		$ID =~ s/-/_/;
-		#print "-$ID-\n";
+		$ID =~ s/-A//;
+		#print "=$ID=\n";
 		#exit;
 		if ( !$ID )
 		{
