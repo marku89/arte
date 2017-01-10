@@ -5,7 +5,7 @@
 use strict;
 use warnings;
 
-my $ogfolder="/arte/stream"; # folder to store
+my $ogfolder="/mnt/stream"; # folder to store
 my $url;
 my $data;
 my $folder="sortme";
@@ -21,9 +21,10 @@ foreach	my $line (@liste)
 	chomp ($line);
 	print "$line\n";
 	# get genre:Kurzfilm
-	$folder = `cat $line |  grep {  | grep genre | sed 's/.*genre://;s/,.*//'`;
+	$folder = `cat $line | grep genre | sed 's/.*genre"://;s/,.*//;s/.*_//;s/"//'`;
 	chomp($folder);
-	print"$folder\n";
+	print"==$folder==\n";
+	#exit;
 	if (! $folder || $folder =~ m/^{/ )
 	{
 		# TEST online genre status
