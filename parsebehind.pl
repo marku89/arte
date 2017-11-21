@@ -37,11 +37,14 @@ if ( $rechte )
 }
 
 my $AID = $i;
-$AID =~ s/.*de\///;
+## /de/videos/
+$AID =~ s/.*de\///g;
+$AID =~ s/videos\///;
 $AID =~ s/\/.*//;
 
-print " \n $AID \n";
+print " \n==$AID==\n";
 my $json = `wget https://api.arte.tv/api/player/v1/config/de/$AID?platform=ARTEPLUS7 -qO - `;
+print "wget https://api.arte.tv/api/player/v1/config/de/$AID?platform=ARTEPLUS7 -qO -\n";
 
 if ( grep { /AUSSCHNITT/  } $json ) 
 {
@@ -54,13 +57,14 @@ $json =~ s/\\\//\//g;
 $json =~ s/\(//g;
 $json =~ s/\)//g;
 $json =~ s/'//g;
+$json =~ s/!//g;
 
 
-#print "$json";
+print "$json";
 #exit
 
 my $mp4;
-$mp4 = `echo '$json' | grep "HTTP_MP4_SQ_1" -A8 | grep url | head -n1`;
+$mp4 = `echo '$json' | grep "HTTPS_MP4_SQ_1" -A8 | grep url | head -n1`;
 $mp4 =~ s/.*http/http/;
 $mp4 =~ s/mp4.*/mp4/;
 chomp($mp4);
@@ -96,6 +100,7 @@ $file =~ s/&//g;
 $file =~ s/\//-/g;
 $file =~ s/\\//g;
 $file =~ s/\///g;
+$file =~ s/!//g;
 
 #print "=$file= \n";
 #exit;

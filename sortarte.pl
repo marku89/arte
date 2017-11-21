@@ -21,7 +21,7 @@ foreach	my $line (@liste)
 	chomp ($line);
 	print "$line\n";
 	# get genre:Kurzfilm
-	$folder = `cat $line | grep genre | sed 's/.*genre"://;s/,.*//;s/.*_//;s/"//'`;
+	$folder = `cat $line | grep "genre\\":" | sed 's/.*genre"://;s/,.*//;s/.*_//;s/"//'`;
 	chomp($folder);
 	print"==$folder==\n";
 	#exit;
@@ -30,11 +30,13 @@ foreach	my $line (@liste)
 		# TEST online genre status
 		$url = `cat $line |  grep {  | sed 's/.*VUP://;s/,.*//' | grep http`;
 		print "==$url==";
+		#exit ;
 		my $keyword="badge-trailer";
 		my $getl = `wget -qO- "$url" | grep content-metadata -A3 | grep "collapse in" -A3 | grep -v "<"`;
 		print "==$getl==";
 		chomp($getl);
 		$folder=$getl;
+		$folder=~s/\\//;
 		#print "i--$getl--a";
 		#exit;
 		if (! $folder )
@@ -43,6 +45,7 @@ foreach	my $line (@liste)
 			$folder="sortme";
 		}
 	}
+	chomp $folder;
 	`mkdir -p $folder`;
 	my $name = $line ;
 	$name =~ s/\.meta\.txt//;
