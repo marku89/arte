@@ -43,8 +43,9 @@ $AID =~ s/videos\///;
 $AID =~ s/\/.*//;
 
 print " \n==$AID==\n";
-my $json = `wget https://api.arte.tv/api/player/v1/config/de/$AID?platform=ARTEPLUS7 -qO - `;
-print "wget https://api.arte.tv/api/player/v1/config/de/$AID?platform=ARTEPLUS7 -qO -\n";
+my $json = `wget --user-agent="Mozilla/5.0 (<h1>FUCK YOU, we still use WG3T xD)" \"https://api.arte.tv/api/player/v1/config/de/$AID?lifeCycle=1&lang=de_DE?RIPID=23\" -qO - `;
+
+print "wget https://api.arte.tv/api/player/v1/config/de/$AID?lifeCycle=1&lang=de_DE?RIPID=23 -qO - \n";
 
 if ( grep { /AUSSCHNITT/  } $json ) 
 {
@@ -60,11 +61,11 @@ $json =~ s/'//g;
 $json =~ s/!//g;
 
 
-print "$json";
+#print "$json";
 #exit
 
 my $mp4;
-$mp4 = `echo '$json' | grep "HTTPS_MP4_SQ_1" -A8 | grep url | head -n1`;
+$mp4 = `echo '$json' | grep "HTTPS_SQ_1" -A8 | grep url | head -n1`;
 $mp4 =~ s/.*http/http/;
 $mp4 =~ s/mp4.*/mp4/;
 chomp($mp4);
