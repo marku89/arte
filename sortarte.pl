@@ -5,7 +5,7 @@
 use strict;
 use warnings;
 
-my $ogfolder="/mnt/stream"; # folder to store
+my $ogfolder="/arte/stream"; # folder to store
 my $url;
 my $data;
 my $folder="sortme";
@@ -30,8 +30,8 @@ foreach	my $line (@liste)
 		# TEST online genre status
 		$url = `cat $line |  grep {  | sed 's/.*VUP://;s/,.*//' | grep http`;
 		print "==$url==";
+		$url =~ s/ /-/g;
 		#exit ;
-		my $keyword="badge-trailer";
 		my $getl = `wget -qO- "$url" | grep content-metadata -A3 | grep "collapse in" -A3 | grep -v "<"`;
 		print "==$getl==";
 		chomp($getl);
