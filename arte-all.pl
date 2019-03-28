@@ -53,7 +53,7 @@ foreach my $line (@prog)
 	}
 	if ( $count == 0 )
 	{
-		print "Magici home-main-slider Sting not found, There is no content on the page !";
+		print "Sting not found, There is no content on the page !\n";
 		sleep 1;
 		exit 1;
 	}
@@ -64,7 +64,7 @@ foreach my $line (@prog)
 	# copy list to rc 
 }
 my @rcliste = @liste ; 
-print @liste;
+#print @liste;
 
 if ( !@liste )
 {
@@ -83,13 +83,13 @@ foreach my $line (@rcliste)
 		$line =~ s/^\/\///g;
 		print "GET RC --$line--\n"; 
  	        my @templiste = `wget $line -qO-  | grep --color url | tr ':' '\n/'   | grep arte.tv | grep videos | grep title | grep -v RC- | sed 's/",.*//'`;
- 	        print "wget $line -qO-  | grep --color url | tr ':' '\n/'   | grep arte.tv | grep videos | grep title | grep -v RC- | sed 's/\",.*//'";
+ 	        #print "wget $line -qO-  | grep --color url | tr ':' '\n/'   | grep arte.tv | grep videos | grep title | grep -v RC- | sed 's/\",.*//'";
 		chomp(@templiste);
-		print @templiste;
-		foreach my $newline (@templiste) 
-		{
-			print "--$newline--\n";
-		}
+		#print @templiste;
+		#foreach my $newline (@templiste) 
+		#{
+		#	print "--$newline--\n";
+		#}
 		push @liste, @templiste;
 		sleep 1; 
 	}
@@ -106,7 +106,7 @@ foreach my $line (@liste)
 		$line =~ s/\/\///;
 			
 		chomp($line);
-		print "GET $line    \n";
+		#print "GET $line    \n";
 	 	# www.arte.tv/de/videos/005105-000-A/die-zwei-leben-der-veronika 	
 		$ID = $line;
 		$ID =~ s/.*videos\///;

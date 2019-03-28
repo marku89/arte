@@ -52,7 +52,7 @@ if ( !$AID )
 	exit 2;
 }
 
-print "wget https://api.arte.tv/api/player/v1/config/de/$AID?lifeCycle=1&lang=de_DE?RIPID=23 -qO - \n";
+#print "wget https://api.arte.tv/api/player/v1/config/de/$AID?lifeCycle=1&lang=de_DE?RIPID=23 -qO - \n";
 
 if ( grep { /AUSSCHNITT/  } $json ) 
 {
@@ -103,9 +103,9 @@ my $file = $json;
 chomp($file);
 $file =~ s/.*"VTI":"//;
 $file =~ s/":.*//;
-print "=1-=$file=-=\n"; 
+#print "=1-=$file=-=\n"; 
 $file =~ s/,.*/.mp4/;
-print "=2-=$file=-=\n";
+#print "=2-=$file=-=\n";
 $file =~ s/  / /g;
 $file =~ s/ /_/g;
 $file =~ s/'//g;
@@ -128,7 +128,7 @@ print "final=$file= \n";
 $file = "$date-$ID-$file";
 chomp($file);
 
-print "all--$file--$mp4--\n";
+#print "all--$file--$mp4--\n";
 
 my $ogfolder="/arte/stream";
 
@@ -136,6 +136,6 @@ my $ogfolder="/arte/stream";
 
 `echo '$json' > $ogfolder/$file.meta.txt`;
 
-print "wget \"$mp4\" -c -O $ogfolder/$file >> /tmp/wget-log\n";
+#print "wget \"$mp4\" -c -O $ogfolder/$file >> /tmp/wget-log\n";
 `echo 'wget $mp4 -c -O $ogfolder/$file' >> /tmp/wget-log`;
 `wget $mp4 -c -O $ogfolder/$file`;
