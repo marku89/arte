@@ -1,36 +1,35 @@
 arte
 ====
 
-Jeden Film von Arte Aufzeichnen ? auch wenn er nur live läuft, nun möglich !
+Download the Content from Arte
 
-Das Perl script schreibt kontinurlich die einzelen Filme aus dem live Stream weg in mp4 files sowie Meta Daten und die zwischen seqenzen mit timestamp und Arte ID.
-
-arte.pl v0.8.3
+v1.0
 
 
-Anforderungen
+Dependencies 
 ====
 
-debian ! 
+- SPACE on DISK more than 2TB 
+- Linux
+- Strong Internet Connection or Time
 
-aptitude install perl wget
+I chose debian you have to install : wget perl screen 
 
 
-Benutzung 
+Usage 
 ====
-1. Einstellen der Umgebungsvariabeln auf seine DISK layout 
-	my $ogfolder="/arte/stream";
-
-
-Live:
-Zum aufzeichnen arte.pl im scren laufen aufm Server 
-
-
-7 Plus:
-In cron eintragen damit es jeden Morgen läuft.
-	0 5 * * * /usr/bin/perl /home/markus/arte/arte-7plus.pl
-
-Einzelne Sendungen:
-Wichtig ist das man die Arte URL ohne ? und vollständig angibt in Anführungszeichen !
-	perl parsebehind.pl "http://www.arte.tv/guide/de/048727-003/x-enius"
+1. Create or replace follow folder to your needs: 
+	$ogfolder="/arte/stream";
+	sed 's/\/arte\/stream/\/our\/disk/' *.pl
+	
+- 7 Plus: Runs once a day with cron. Download the online content from the TV Program
+	23 5 * * * /usr/bin/perl /arte/arte-7plus.pl
+- Download everythink at Mediatek 
+	bash arte-all.bash
+- Download everythink on one Page
+	perl arte-all.pl "https://www.arte.tv/de/videos/kultur-und-pop/kunst/?page=23"
+- Download only Specific Video
+	perl parsebehind.pl "https://www.arte.tv/de/videos/080979-000-A/john-ford-der-mann-der-amerika-erfand/"
+- Live records: arte.pl must be used live in
+        do not use it , its outdatet und not stable
 	
