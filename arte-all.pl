@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 # arte parser for every content on the page  
-
+# - dont delete the sleeps , because arte has a connetion limit at 20 per 10 sec 
+# 
 
 use warnings;
 use strict;
@@ -50,6 +51,11 @@ foreach my $line (@prog)
 			#print "found url $ln\n";
 			push @liste,$ln;
 		}
+		if ( $ln =~ 'RC-' )
+		{
+			#print "found RC-";
+			$count++;
+		}
 	}
 	if ( $count == 0 )
 	{
@@ -91,7 +97,7 @@ foreach my $line (@rcliste)
 		#	print "--$newline--\n";
 		#}
 		push @liste, @templiste;
-		sleep 1; 
+		#sleep 1; 
 	}
 
 }
@@ -118,16 +124,30 @@ foreach my $line (@liste)
 		if ( !$ID )
 		{
 			print "ID is leer\n";
-			exit;
+			next;
 		}
 		if ( ! `find $ogfolder -name "*$ID*.mp4*" 2> /dev/null` )
 		{
+			# limit screen 
+			my $screen =  `screen -ls | grep arteDN | wc -l`;
+			chomp($screen);
+			if ( $screen > 10 )
+			{
+				print "Downloads $screen limit !!\n";
+				sleep 30;
+				# slow it more down
+				if ($screen > 15 )
+				{
+					sleep 60; 
+				} 
+			}
 			print "\nNO File found ... will Download -- $line --\n";
-			system("cd $ogfolder; $homefolder/parsebehind.pl \\\"http://$line\\\"");
-			print "$homefolder/parsebehind.pl \"http://$line\"";
-			#system("screen -dmS $ID-rtmp bash /tmp/run7.sh"); # start the ffmpeg dump detached 
-			sleep 2;
+			#system("cd $ogfolder; $homefolder/parsebehind.pl \\\"http://$line\\\"");
+			system("echo \"cd $ogfolder; $homefolder/parsebehind.pl \\\"http://$line\\\"\" > /tmp/run7.sh");
+			#print "$homefolder/parsebehind.pl \"http://$line\"";
+			system("screen -dmS $ID-arteDN bash /tmp/run7.sh"); # start the ffmpeg dump detached 
 			#`rm /tmp/run7.sh`;
+			sleep 1;
 		}
 	}		
 }
