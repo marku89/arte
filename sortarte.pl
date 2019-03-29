@@ -46,7 +46,7 @@ foreach	my $line (@liste)
 		}
 	}
 	chomp $folder;
-	`mkdir -p $folder`;
+	`mkdir -p $ogfolder/$folder`;
 	my $name = $line ;
 	$name =~ s/\.meta\.txt//;
 	print "mv $name* $ogfolder/$folder/\n";
