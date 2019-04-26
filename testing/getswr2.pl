@@ -31,7 +31,7 @@ foreach my $in (@liste)
 	## manual test
 	#$in = ""; 
 	print "==$in==\n";
-	$mp3 = `wget -qO- "$in" | grep "file:.*mp3" | sed 's/.*http/http/;s/mp3.*/mp3/' | head -n1`;
+	$mp3 = `wget -qO- "$in" | grep mp3 | sed 's/.*http/http/;s/".*//' | head -n1`;
 	chomp($mp3);
 	print "==$mp3==\n";
 
